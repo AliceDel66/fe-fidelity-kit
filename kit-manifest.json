@@ -1,0 +1,38 @@
+{
+  "kit": "fe-fidelity-kit",
+  "version": "0.1.0",
+  "purpose": "Self-check manifest. fidelity-adopt --verify asserts these dirs exist and the cross-references resolve from their own locations (catches a partial drop-in copy that omitted rules/).",
+  "requires_dirs": [
+    "skills",
+    "commands",
+    "rules",
+    "profile"
+  ],
+  "components": {
+    "skills": [
+      "skills/fidelity-adopt/SKILL.md",
+      "skills/fidelity-plan/SKILL.md",
+      "skills/fidelity-build-from-mockup/SKILL.md",
+      "skills/fidelity-page-handoff/SKILL.md"
+    ],
+    "commands": [
+      "commands/fidelity-review.md"
+    ],
+    "rules": [
+      "rules/fidelity-visual.md",
+      "rules/fidelity-gate.md"
+    ],
+    "profile_template": "profile/fidelity-profile.template.md"
+  },
+  "cross_refs": [
+    { "from": "skills/fidelity-plan/SKILL.md", "to": "../../rules/fidelity-visual.md" },
+    { "from": "skills/fidelity-plan/SKILL.md", "to": "../../rules/fidelity-gate.md" },
+    { "from": "skills/fidelity-build-from-mockup/SKILL.md", "to": "../../rules/fidelity-visual.md" },
+    { "from": "skills/fidelity-build-from-mockup/SKILL.md", "to": "../../rules/fidelity-gate.md" },
+    { "from": "skills/fidelity-page-handoff/SKILL.md", "to": "../../rules/fidelity-gate.md" },
+    { "from": "skills/fidelity-adopt/SKILL.md", "to": "../../profile/fidelity-profile.template.md" },
+    { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-gate.md" },
+    { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-visual.md" }
+  ],
+  "project_profile_path": ".claude/fidelity-profile.md"
+}

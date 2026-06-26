@@ -1,0 +1,13 @@
+{
+  "name": "fe-fidelity-kit",
+  "owner": {
+    "name": "yaocheng"
+  },
+  "plugins": [
+    {
+      "name": "fe-fidelity-kit",
+      "source": ".",
+      "description": "1:1 frontend mockup reproduction + cross-model review gate. Stack-neutral; bindings in .claude/fidelity-profile.md."
+    }
+  ]
+}
