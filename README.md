@@ -145,7 +145,7 @@ flowchart TD
 | **Reproduce (hand off)** | `fidelity-page-handoff` | Emits a ready-to-paste prompt that hands the page to a different model/host as the executor — with the spec slice, done-definition, Loop Engineering, and gate handshake pre-filled. |
 | **Verify** | *(executor)* | `lint + typecheck + test` green, then **actually run the page**: load + screenshot, measure the box-model, drive interactive states, check console/network/responsive. Keep the evidence. |
 | **Loop Engineering** | *(executor)* | One self-refactor pass to the simplest shape — behavior and rendered result must not change — then re-run the entire done-definition. |
-| **Gate** | `/fidelity-review` | A read-only reviewer (ideally a different model) audits the diff + evidence and emits `[P1]/[P2]` → `Gate: PASS | FAIL`. |
+| **Gate** | `/fidelity-review` *(or `fidelity-page-handoff` Template C → another host)* | A read-only reviewer (ideally a different model) audits the diff + evidence and emits `[P1]/[P2]` → `Gate: PASS | FAIL`. |
 
 ---
 
@@ -282,7 +282,7 @@ Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill 
 | [`skills/fidelity-adopt`](skills/fidelity-adopt/SKILL.md) | **Run this first.** Detects the stack, asks only the gaps, writes `.claude/fidelity-profile.md`. Non-destructive, re-runnable. |
 | [`skills/fidelity-plan`](skills/fidelity-plan/SKILL.md) | **Run this second (multi-page).** Surveys the whole mockup → design patterns, the **shared vs page-local** component inventory, a phased build order → `.claude/fidelity-plan.md` + a living progress tracker the build loop syncs. |
 | [`skills/fidelity-build-from-mockup`](skills/fidelity-build-from-mockup/SKILL.md) | The reproduction loop — *you* build the page (native-first, token-by-value, five zones, measured verify, Loop Engineering, then the gate). |
-| [`skills/fidelity-page-handoff`](skills/fidelity-page-handoff/SKILL.md) | Emits a ready-to-paste prompt to hand a page to a **different** model/host (e.g. Codex) as the executor. |
+| [`skills/fidelity-page-handoff`](skills/fidelity-page-handoff/SKILL.md) | Emits a ready-to-paste prompt to hand a page to a **different** model/host (e.g. Codex) — as the **executor** (build/fix, Templates A/B) or the read-only **reviewer** (run the gate, Template C). |
 | [`commands/fidelity-review`](commands/fidelity-review.md) | The reviewer half of the gate: `/fidelity-review` → `[P1]/[P2]` + `Gate: PASS\|FAIL`. |
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | Stack-neutral fidelity discipline (the five disaster zones, token-by-value, box-model measurement, AHA). |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | Stack-neutral executor×reviewer protocol (evidence contract, runtime≠static boundary, single-model fallback). |

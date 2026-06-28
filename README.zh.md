@@ -145,7 +145,7 @@ flowchart TD
 | **还原（交出去）** | `fidelity-page-handoff` | 生成一段可直接粘贴的 prompt，把页面交给另一个 model/host 作为 executor —— 其中 spec 片段、done-definition、Loop Engineering 与 gate 握手都已预填。 |
 | **验证** | *(executor)* | `lint + typecheck + test` 全绿，然后**真的把页面跑起来**：load + 截图、量 box-model、驱动 interactive states、检查 console/network/responsive。保留证据。 |
 | **Loop Engineering** | *(executor)* | 一轮自重构，收敛到最简形态 —— 行为与渲染结果不得改变 —— 然后重跑整套 done-definition。 |
-| **Gate** | `/fidelity-review` | 一个只读的 reviewer（最好是不同模型）审查 diff + 证据，给出 `[P1]/[P2]` → `Gate: PASS | FAIL`。 |
+| **Gate** | `/fidelity-review` *(或 `fidelity-page-handoff` 模板 C → 另一个 host)* | 一个只读的 reviewer（最好是不同模型）审查 diff + 证据，给出 `[P1]/[P2]` → `Gate: PASS | FAIL`。 |
 
 ---
 
@@ -282,7 +282,7 @@ cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.cla
 | [`skills/fidelity-adopt`](skills/fidelity-adopt/SKILL.md) | **先跑这个。** 探测技术栈，只问缺口，写出 `.claude/fidelity-profile.md`。非破坏性、可重跑。 |
 | [`skills/fidelity-plan`](skills/fidelity-plan/SKILL.md) | **第二个跑（多页）。** 普查整个 mockup → 设计模式、**shared vs page-local** 组件清单、分阶段构建顺序 → `.claude/fidelity-plan.md` + 构建循环同步的 living 进度追踪。 |
 | [`skills/fidelity-build-from-mockup`](skills/fidelity-build-from-mockup/SKILL.md) | 还原循环 —— *你*来构建页面（native 优先、token 按值、五个灾难区、量化验证、Loop Engineering，然后 gate）。 |
-| [`skills/fidelity-page-handoff`](skills/fidelity-page-handoff/SKILL.md) | 生成可直接粘贴的 prompt，把页面交给一个**不同的** model/host（例如 Codex）作为 executor。 |
+| [`skills/fidelity-page-handoff`](skills/fidelity-page-handoff/SKILL.md) | 生成可直接粘贴的 prompt，把页面交给一个**不同的** model/host（例如 Codex）—— 作为 **executor**（构建/修复，模板 A/B）或只读 **reviewer**（跑 gate，模板 C）。 |
 | [`commands/fidelity-review`](commands/fidelity-review.md) | gate 中 reviewer 的那一半：`/fidelity-review` → `[P1]/[P2]` + `Gate: PASS\|FAIL`。 |
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | stack-neutral 的 fidelity 纪律（五个灾难区、token 按值、box-model 量化、AHA）。 |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | stack-neutral 的 executor×reviewer 协议（证据契约、runtime≠static 边界、single-model 兜底）。 |

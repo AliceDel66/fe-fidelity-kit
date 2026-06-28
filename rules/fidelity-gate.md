@@ -78,4 +78,5 @@ Gate: PASS (visual-only — box-model UNVERIFIED)
 The verdict vocabulary (`[P1]/[P2]` + `Gate:` + `Recommendation:`) is intentionally aligned with repo-harness so reviews are bidirectional and machine-parseable:
 
 - When the **other** model is the executor, call this gate as the cross-model second opinion (read-only: `Read,Grep,Glob`).
+- When **you** are the executor and a **different** host should review, emit the reviewer prompt with `fidelity-page-handoff` (Template C — review handoff): it carries the diff locator, the evidence dir, the style-match checklist, and this verdict contract to the other host — the reviewer-side counterpart of handing off the build.
 - Present the other side's output **verbatim, unsoftened**; converge on `[P1]/[P2]` + the two-line tail.
