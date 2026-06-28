@@ -55,7 +55,7 @@ You are the executor — `fidelity-gate.md §3`: a reviewer PASS never exempts t
    - **box-model digits** (catch 4–8px drift): `recipe.box` on your container → compare each value against what you grepped from `profile.mockup.styles`.
    - **drive interactive states** (`recipe.drive_state`) for Z5.
    - **runtime health**: `recipe.console`, `recipe.network`, `recipe.responsive` across `profile.verify.viewports`.
-3. Fix until visuals match, numbers match, and console/network are clean. Keep the evidence (screenshots / console / inspect) in `profile.verify.evidence_dir`.
+3. Fix until visuals match, numbers match, and console/network are clean. Keep the evidence in `profile.verify.evidence_dir`, named per `fidelity-gate.md`'s evidence contract (`<route>-<state>-<viewport>.png` / `<route>-box.txt` / `<route>-console.txt`) so the gate can cite it.
 
 > If `profile.verify.measure_capable` is false: you can't satisfy "measure not overlay" — fall back to `token_source` + the source's CSS values item by item, but STILL actually run console/responsive. The gate is capped to `PASS (visual-only — box-model UNVERIFIED)` (see `fidelity-gate.md §3`).
 

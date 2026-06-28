@@ -199,6 +199,8 @@ flowchart LR
 | 负责 | 写代码；跑 lint/typecheck/test；**把页面跑起来**；量 box-model、驱动 states、检查 console/network/responsive；附上证据 | 审 diff、行为风险、edge/failure 路径、测试薄弱处；对 UI，从代码 + executor 的截图审 style-match 信号；给出结论 |
 | **不**负责 | 自己裁定 gate 结论 | 跑页面或改代码 |
 
+executor 的证据不是零散截图 —— 它遵循一套命名契约（`<route>-<state>-<viewport>.png`、`<route>-box.txt`、`<route>-console.txt`），都放在 `profile.verify.evidence_dir` 下，这样 reviewer 的一条结论就能像代码引用 `file:line` 那样引用某个文件。见 [`fidelity-gate.md`](rules/fidelity-gate.md)。
+
 **结论规则**
 
 - `[P1]` = **必须修 → FAIL。** spec/行为漂移、被吞掉的错误、缺失的 edge 路径、同义反复的测试、破坏的接口、竞态 —— **以及破坏当前 UI 目标的视觉漂移**（icon set 被换、heading 字体回退到系统字体、generated-visual 结构不对、box-model 漂移）。

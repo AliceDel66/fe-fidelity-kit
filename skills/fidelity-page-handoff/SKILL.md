@@ -58,7 +58,7 @@ Done-definition (all required — you are the executor; the reviewer gate does N
   • mockup side-by-side: compare at the same viewport ({{profile.mockup.mockup_serve_url}} or the source render).
   • interactive states: {{profile.verify.recipe.drive_state}} for hover/focus/open.
   • runtime health: {{profile.verify.recipe.console}} , {{profile.verify.recipe.network}} , {{profile.verify.recipe.responsive}} across {{profile.verify.viewports}}.
-- Fix until visuals + numbers match and console/network are clean. Attach the screenshots + console/inspect results in your handoff notes.
+- Fix until visuals + numbers match and console/network are clean. Save evidence under {{profile.verify.evidence_dir}} named per fidelity-gate.md's evidence contract (`<route>-<state>-<viewport>.png` / `<route>-box.txt` / `<route>-console.txt`), and list the paths in your handoff notes.
 
 Loop Engineering (one self-refactor pass after the done-definition is green, before review):
 - Only after everything above is green. The first version just needs to run; this pass rewrites it to the simplest shape.
@@ -106,7 +106,7 @@ Read first (the SoT — don't work from memory):
 
 What to review:
 - The change: <diff locator — e.g. `git diff <base>..HEAD` where <base> = the repo's default branch, or the explicit list of changed files>.
-- The executor's runtime evidence (they already ran the page): screenshots / console / box-model under {{profile.verify.evidence_dir}}.
+- The executor's runtime evidence (they already ran the page): screenshots / console / box-model under {{profile.verify.evidence_dir}}, named per fidelity-gate.md's evidence contract (`<route>-<state>-<viewport>.png`, `<route>-box.txt`, …).
 
 Audit — tag EVERY finding [P1] (must-fix -> FAIL) or [P2] (suggestion):
 - Behavior: spec/behavior drift, swallowed errors (try/catch, ?., ?? hiding a real failure), missing edge/failure paths (empty/null/0/loading/failed/unauthorized/overflowing text), tautological tests, broken public interface, races.

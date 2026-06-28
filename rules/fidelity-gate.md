@@ -57,6 +57,17 @@ Gate: PASS (visual-only — box-model UNVERIFIED)
 
 — never a clean PASS. The reviewer states box-model items as UNVERIFIED rather than PASSED, and `fidelity-adopt` should nudge installing a measurement-capable tool (e.g. a headless-browser skill / Playwright).
 
+### Evidence layout & naming (the executor → reviewer contract)
+
+The reviewer can't run the page — it only reads what the executor left, so evidence is a **contract**, not loose files. Put everything under `profile.verify.evidence_dir` with predictable names, so a visual finding can cite a file the way a code finding cites `file:line`:
+
+- **Screenshots** — `<route>-<state>-<viewport>.png`: one per interactive state the page defines (Zone 5) × each `profile.verify.viewports` (e.g. `dashboard-default-1440.png`, `dashboard-hover-cta-1440.png`, `dashboard-default-375.png`). When the source is loadable, add the matching mockup region `<route>-mockup-<viewport>.png` for the side-by-side.
+- **Box-model** — `<route>-box.txt`: the computed `padding/gap/border/border-radius/font-size` per hand-built container, paired with the values grepped from `profile.mockup.styles` (the digit-by-digit Zone-4 comparison).
+- **Runtime health** — `<route>-console.txt` (errors) + `<route>-network.txt` (failed requests). An empty file means "checked, clean"; a *missing* file is not evidence.
+- **Citing it** — the executor's submission (handoff notes / PR body) lists the evidence paths; the reviewer cites them in findings ("box drift — `dashboard-box.txt`, row `.stat-card`"). A visual `[P1]/[P2]` with no citable evidence is itself the finding (per §3).
+
+If `measure_capable: false`, the `-box.txt` file is replaced by a note of the source CSS values used (the target is unmeasurable) — screenshots, console, network, responsive are still all required.
+
 ## 4. Flow — one slice's handshake
 
 1. **Executor** finishes → `profile.commands.lint` + `profile.commands.typecheck` + `profile.commands.test` green → **runs the page** for the §3 runtime checks (all green = "it runs") → captures screenshot / console / network / box-model evidence.

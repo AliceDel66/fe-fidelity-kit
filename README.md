@@ -199,6 +199,8 @@ flowchart LR
 | Owns | writes code; runs lint/typecheck/test; **runs the page**; measures box-model, drives states, checks console/network/responsive; attaches evidence | audits diff, behavior risk, edge/failure paths, test weakness; for UI, audits style-match signals from code + the executor's screenshots; emits the verdict |
 | Does **not** | self-judge the gate verdict | run the page or edit code |
 
+The executor's evidence isn't loose screenshots — it follows a naming contract (`<route>-<state>-<viewport>.png`, `<route>-box.txt`, `<route>-console.txt`) under `profile.verify.evidence_dir`, so a reviewer finding can cite a file the way code cites `file:line`. See [`fidelity-gate.md`](rules/fidelity-gate.md).
+
 **Verdict rules**
 
 - `[P1]` = **must-fix → FAIL.** Spec/behavior drift, swallowed errors, missing edge paths, tautological tests, broken interfaces, races — **and visual drift that breaks the current UI goal** (icon set swapped, heading font fell back to system, generated-visual structure off, box-model drift).
