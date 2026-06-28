@@ -248,7 +248,7 @@ Skills/commands appear namespaced: `/fe-fidelity-kit:fidelity-review`, the `fide
 <summary><b>B. Plugin, via marketplace</b> — team distribution</summary>
 
 ```bash
-claude plugin marketplace add <git-url>   # team: point at the kit's git remote (recommended)
+claude plugin marketplace add https://github.com/AliceDel66/fe-fidelity-kit   # team: point at the kit's git remote (recommended)
 # or, same machine only:  claude plugin marketplace add <kit-dir>
 claude plugin install fe-fidelity-kit@fe-fidelity-kit
 ```

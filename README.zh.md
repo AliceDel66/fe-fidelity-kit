@@ -248,7 +248,7 @@ skills/commands 以命名空间形式出现：`/fe-fidelity-kit:fidelity-review`
 <summary><b>B. 插件，经由 marketplace</b> —— 团队分发</summary>
 
 ```bash
-claude plugin marketplace add <git-url>   # 团队：指向 kit 的 git remote（推荐）
+claude plugin marketplace add https://github.com/AliceDel66/fe-fidelity-kit   # 团队：指向 kit 的 git remote（推荐）
 # 或仅同机：  claude plugin marketplace add <kit-dir>
 claude plugin install fe-fidelity-kit@fe-fidelity-kit
 ```
