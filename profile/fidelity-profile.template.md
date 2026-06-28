@@ -4,7 +4,7 @@
 > `fidelity-adopt` copies this into the target project as `./.claude/fidelity-profile.md` and fills it in.
 > To fill by hand: replace every `FILL:` / `TODO(adopt:…)`, delete the `# guidance` comments, keep the section headings.
 > All `profile.X` references in the kit's rules/skills/commands resolve against the YAML block + the markdown maps below.
-> Reference convention: a **distinctive** leaf is written **bare** (`profile.token_sot`, `profile.ui_lib`, `profile.page_components_pattern`); a **generic** leaf keeps its **section prefix** (`profile.commands.lint`, `profile.verify.box`, `profile.mockup.styles`, `profile.gate.reviewer_host`).
+> Reference convention: a **distinctive** leaf is written **bare** (`profile.token_sot`, `profile.ui_lib`, `profile.page_components_pattern`); a **generic** leaf keeps its **section prefix** (`profile.commands.lint`, `profile.verify.recipe.box`, `profile.mockup.styles`, `profile.gate.reviewer_host`).
 
 ```yaml
 profile_version: 1

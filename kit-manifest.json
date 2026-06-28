@@ -34,5 +34,6 @@
     { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-gate.md" },
     { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-visual.md" }
   ],
-  "project_profile_path": ".claude/fidelity-profile.md"
+  "project_profile_path": ".claude/fidelity-profile.md",
+  "selfcheck_script": "scripts/verify-kit.mjs"
 }

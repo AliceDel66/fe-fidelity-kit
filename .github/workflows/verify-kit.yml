@@ -1,0 +1,21 @@
+name: verify-kit
+
+# Self-check the kit on every push / PR: manifest dirs, cross-references,
+# the profile field contract, bilingual README symmetry, and filled examples.
+# Mirrors `fidelity-adopt --verify`, but for the kit repository itself.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run kit self-check
+        run: node scripts/verify-kit.mjs

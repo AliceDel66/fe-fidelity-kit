@@ -20,8 +20,8 @@ Probe the project and record findings; do NOT guess past the evidence.
 
 - **`package.json`**:
   - framework ← `next` / `vite` + `react-router` / `@remix-run/*` / `astro` / `nuxt`.
-  - ui_lib ← `antd` / `@mui/material` / `@radix-ui/*` / `@chakra-ui/react` / `@shadcn` patterns / none.
-  - icon_lib ← `lucide-react` / `@ant-design/icons` / `react-icons` / `@heroicons/*`.
+  - ui_lib ← (React) `antd` / `@mui/material` / `@radix-ui/*` / `@chakra-ui/react` / `@shadcn` patterns; (Vue) `@nuxt/ui` / `naive-ui` / `element-plus` / `vuetify` / `primevue`; or none.
+  - icon_lib ← (React) `lucide-react` / `@ant-design/icons` / `react-icons` / `@heroicons/*`; (Vue/Iconify) `@nuxt/icon` / `@iconify/vue` / `unplugin-icons` / `lucide-vue-next` — note the Iconify *string-name* paradigm (`i-lucide-*`) vs named imports.
   - styling ← `@emotion/*` + `antd-style` / `tailwindcss` / `styled-components` / `*.module.css` usage / `@vanilla-extract/*`.
   - chart_lib ← `recharts` / `@visx/*` / `chart.js` / none.
   - scripts ← `dev` / `lint` / `test` (prefer a run-once variant) / `typecheck` / `build`.

@@ -286,7 +286,7 @@ Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill 
 | [`commands/fidelity-review`](commands/fidelity-review.md) | The reviewer half of the gate: `/fidelity-review` → `[P1]/[P2]` + `Gate: PASS\|FAIL`. |
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | Stack-neutral fidelity discipline (the five disaster zones, token-by-value, box-model measurement, AHA). |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | Stack-neutral executor×reviewer protocol (evidence contract, runtime≠static boundary, single-model fallback). |
-| [`profile/`](profile/) | The profile template + two filled examples (Next/AntD; Vite/Tailwind/Radix). |
+| [`profile/`](profile/) | The profile template + three filled examples (Next/AntD; Vite/Tailwind/Radix; Nuxt/Vue/Nuxt UI). |
 | [`kit-manifest.json`](kit-manifest.json) | Self-check manifest — `fidelity-adopt --verify` asserts the dirs exist and the cross-references resolve (catches a partial drop-in copy). |
 
 ---
@@ -295,14 +295,15 @@ Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill 
 
 Everything stack-specific lives in `.claude/fidelity-profile.md` (project-local, written by `fidelity-adopt`). The methodology files cite fields like `profile.token_sot`, `profile.icon_lib`, `profile.verify.recipe.box`, and resolve them there at runtime.
 
-**Reference convention:** a *distinctive* leaf is written bare (`profile.token_sot`, `profile.ui_lib`, `profile.page_components_pattern`); a *generic* leaf keeps its section prefix (`profile.commands.lint`, `profile.verify.box`, `profile.mockup.styles`, `profile.gate.reviewer_host`).
+**Reference convention:** a *distinctive* leaf is written bare (`profile.token_sot`, `profile.ui_lib`, `profile.page_components_pattern`); a *generic* leaf keeps its section prefix (`profile.commands.lint`, `profile.verify.recipe.box`, `profile.mockup.styles`, `profile.gate.reviewer_host`).
 
 The profile carries: `stack` (framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n), `paths` (import alias, token source-of-truth, token accessor, placement dirs, AHA threshold), `mockup` (render + kind + styles + tokens + spec + dialect), `commands` (install/dev/lint/typecheck/test/build), `verify` (runtime tool, `measure_capable`, viewports, a per-stack measurement recipe), and `gate` (reviewer host, report path). Plus living markdown maps: **Component map** (source dialect → target native, grown on first use), **Icon map**, and **Token traps**.
 
-Two filled examples ship as the fill style and a genericity proof:
+Three filled examples ship as the fill style and a genericity proof:
 
 - [`profile/examples/nexus-pro-fe.profile.md`](profile/examples/nexus-pro-fe.profile.md) — Next 16 + AntD v6 + emotion/antd-style + lucide-react.
 - [`profile/examples/react-tailwind-radix-vite.profile.md`](profile/examples/react-tailwind-radix-vite.profile.md) — Vite + React + Tailwind + Radix (proves the kit is not AntD-shaped; surfaces *same-dialect collapse* and *figma-inspect* edges).
+- [`profile/examples/nuxt-vue-nuxtui.profile.md`](profile/examples/nuxt-vue-nuxtui.profile.md) — Nuxt 3 + Vue + Nuxt UI (proves the kit is not *React*-shaped; surfaces the *cross-paradigm component map* and the *Iconify string-name* icon paradigm `i-lucide-*`).
 
 ---
 
@@ -336,7 +337,7 @@ How strong your verification — and therefore the gate — can be depends on wh
 ## FAQ
 
 **Does it lock me into a framework / UI library?**
-No — that's the whole point. The methodology is stack-neutral; your stack lives in the profile. The shipped examples span AntD and Tailwind/Radix on purpose.
+No — that's the whole point. The methodology is stack-neutral; your stack lives in the profile. The shipped examples span React (AntD, Tailwind/Radix) and Vue (Nuxt UI) on purpose.
 
 **Do I need two different models?**
 No, but it's the strongest mode. With one model the gate degrades to a fresh-context two-pass (see [Caveats](#caveats-that-cap-the-gate)).
@@ -359,7 +360,7 @@ Issues and PRs welcome. The kit is intentionally small and opinionated; the bar 
 - Keep the rules **stack-neutral** — concrete names belong in `profile.<field>`, not in `rules/` or `skills/`.
 - Preserve the **sharp edges** (named traps, exact px, verbatim gotchas). Genericizing must not blunt them.
 - Keep the **path-invariant** layout (relative cross-references; no `${CLAUDE_PLUGIN_ROOT}` in shared files).
-- After editing structure, run `fidelity-adopt --verify` (or check `kit-manifest.json` cross-refs) so a partial/broken layout is caught.
+- After editing structure, run `node scripts/verify-kit.mjs` — it self-checks the manifest dirs, the relative cross-references, the **profile field contract** (every `profile.*` the rules/skills cite is defined in the template), bilingual heading symmetry, and that the examples carry no unfilled `FILL:`. It is CI-friendly (non-zero exit on failure). *(A project that adopted the kit runs `fidelity-adopt --verify` instead — that one needs a filled profile; this one checks the kit repo itself.)*
 
 ---
 

@@ -286,7 +286,7 @@ cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.cla
 | [`commands/fidelity-review`](commands/fidelity-review.md) | gate 中 reviewer 的那一半：`/fidelity-review` → `[P1]/[P2]` + `Gate: PASS\|FAIL`。 |
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | stack-neutral 的 fidelity 纪律（五个灾难区、token 按值、box-model 量化、AHA）。 |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | stack-neutral 的 executor×reviewer 协议（证据契约、runtime≠static 边界、single-model 兜底）。 |
-| [`profile/`](profile/) | profile 模板 + 两个填好的范例（Next/AntD；Vite/Tailwind/Radix）。 |
+| [`profile/`](profile/) | profile 模板 + 三个填好的范例（Next/AntD；Vite/Tailwind/Radix；Nuxt/Vue/Nuxt UI）。 |
 | [`kit-manifest.json`](kit-manifest.json) | 自检清单 —— `fidelity-adopt --verify` 断言目录存在且交叉引用可解析（用于抓出拷一半的 drop-in）。 |
 
 ---
@@ -295,14 +295,15 @@ cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.cla
 
 所有与技术栈相关的东西都在 `.claude/fidelity-profile.md` 里（项目本地，由 `fidelity-adopt` 写出）。方法论文件引用 `profile.token_sot`、`profile.icon_lib`、`profile.verify.recipe.box` 这样的字段，并在运行时对照该文件解析。
 
-**引用约定：** 一个*有辨识度*的叶子直接裸写（`profile.token_sot`、`profile.ui_lib`、`profile.page_components_pattern`）；一个*泛化*的叶子保留它的 section 前缀（`profile.commands.lint`、`profile.verify.box`、`profile.mockup.styles`、`profile.gate.reviewer_host`）。
+**引用约定：** 一个*有辨识度*的叶子直接裸写（`profile.token_sot`、`profile.ui_lib`、`profile.page_components_pattern`）；一个*泛化*的叶子保留它的 section 前缀（`profile.commands.lint`、`profile.verify.recipe.box`、`profile.mockup.styles`、`profile.gate.reviewer_host`）。
 
 profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n）、`paths`（import alias、token source-of-truth、token 访问器、放置目录、AHA 阈值）、`mockup`（render + kind + styles + tokens + spec + dialect）、`commands`（install/dev/lint/typecheck/test/build）、`verify`（运行时工具、`measure_capable`、viewports、一份 per-stack 的测量 recipe）、以及 `gate`（reviewer host、报告路径）。外加几张会生长的 markdown 表：**Component map**（源 dialect → 目标 native，首次用到时生长）、**Icon map**、**Token traps**。
 
-随包附带两个填好的范例，既作填写示范也作可移植性证明：
+随包附带三个填好的范例，既作填写示范也作可移植性证明：
 
 - [`profile/examples/nexus-pro-fe.profile.md`](profile/examples/nexus-pro-fe.profile.md) —— Next 16 + AntD v6 + emotion/antd-style + lucide-react。
 - [`profile/examples/react-tailwind-radix-vite.profile.md`](profile/examples/react-tailwind-radix-vite.profile.md) —— Vite + React + Tailwind + Radix（证明 kit 并非围着 AntD 设计；并暴露 *same-dialect collapse* 与 *figma-inspect* 两类边界）。
+- [`profile/examples/nuxt-vue-nuxtui.profile.md`](profile/examples/nuxt-vue-nuxtui.profile.md) —— Nuxt 3 + Vue + Nuxt UI（证明 kit 并非围着 *React* 设计；并暴露 *cross-paradigm 组件映射* 与 *Iconify 字符串名* 图标范式 `i-lucide-*`）。
 
 ---
 
@@ -336,7 +337,7 @@ profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib /
 ## FAQ
 
 **它会把我锁死在某个框架 / UI 库上吗？**
-不会 —— 这正是重点。方法论是 stack-neutral 的，你的技术栈活在 profile 里。随包的范例特意横跨 AntD 与 Tailwind/Radix。
+不会 —— 这正是重点。方法论是 stack-neutral 的，你的技术栈活在 profile 里。随包的范例特意横跨 React（AntD、Tailwind/Radix）与 Vue（Nuxt UI）。
 
 **我必须有两个不同的模型吗？**
 不必，但那是最强模式。只有一个模型时，gate 降级为新上下文两遍（见[设上限的情况](#会给-gate-设上限的两种情况)）。
@@ -359,7 +360,7 @@ profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib /
 - 保持 rules **stack-neutral** —— 具体名字属于 `profile.<field>`，不属于 `rules/` 或 `skills/`。
 - 保留那些**尖锐的坑**（具名陷阱、精确 px、逐字 gotcha）。泛化不得把它们磨钝。
 - 维持**路径不变**的布局（相对交叉引用；共享文件不用 `${CLAUDE_PLUGIN_ROOT}`）。
-- 改完结构后跑一次 `fidelity-adopt --verify`（或检查 `kit-manifest.json` 交叉引用），以便抓出残缺/损坏的布局。
+- 改完结构后跑一次 `node scripts/verify-kit.mjs` —— 它会自检 manifest 目录、相对交叉引用、**profile 字段契约**（rules/skills 引用的每个 `profile.*` 都在模板里有定义）、双语标题对称性，以及示例里没有残留的 `FILL:`。它对 CI 友好（失败时返回非零退出码）。*（已采纳 kit 的项目改用 `fidelity-adopt --verify`——那个需要一份填好的 profile；这个校验的是 kit 仓库自身。）*
 
 ---
 
