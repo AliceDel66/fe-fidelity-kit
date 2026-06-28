@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-29
+
 ### Added
 - **Repository self-check** `scripts/verify-kit.mjs` (zero-dependency) plus a GitHub Actions workflow — validates the manifest dirs/components, that cross-references resolve from their own location, the **profile field contract** (every `profile.*` the rules/skills cite is defined in the template), bilingual README heading symmetry, that examples carry no unfilled `FILL:`, and that every example defines every template field (the field contract checked both directions). Fills the gap that `fidelity-adopt --verify` only runs inside an *adopting* project, never on the kit repo itself.
 - **Third profile example** `profile/examples/nuxt-vue-nuxtui.profile.md` — a deliberately non-React stack (Nuxt 3 + Vue + Nuxt UI) proving the kit is *framework-paradigm*-neutral, not just CSS-framework-neutral. Surfaces the cross-paradigm component map (React/shadcn → Vue/Nuxt UI) and the Iconify string-name icon paradigm (`i-lucide-*`, where Zone 1 flips from kebab→Pascal named import to "prefix + keep kebab").

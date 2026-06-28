@@ -11,7 +11,7 @@ A stack-neutral toolkit for [Claude Code](https://claude.com/claude-code) (and a
 ![type](https://img.shields.io/badge/type-Claude%20Code%20plugin-5b21b6)
 ![scope](https://img.shields.io/badge/scope-stack--neutral-0f766e)
 ![gate](https://img.shields.io/badge/review-cross--model%20gate-c2410c)
-![status](https://img.shields.io/badge/status-v0.1.0%20·%20early-1e40af)
+![status](https://img.shields.io/badge/status-v0.2.0%20·%20early-1e40af)
 
 </div>
 
