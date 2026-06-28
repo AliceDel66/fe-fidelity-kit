@@ -357,7 +357,7 @@ No. `fidelity-review` is read-only; its only write is the report file. Fixing `[
 
 ## Contributing
 
-Issues and PRs welcome. The kit is intentionally small and opinionated; the bar for changes:
+Issues and PRs welcome. The kit is intentionally small and opinionated. Notable changes are recorded in [CHANGELOG.md](CHANGELOG.md). The bar for changes:
 
 - Keep the rules **stack-neutral** — concrete names belong in `profile.<field>`, not in `rules/` or `skills/`.
 - Preserve the **sharp edges** (named traps, exact px, verbatim gotchas). Genericizing must not blunt them.

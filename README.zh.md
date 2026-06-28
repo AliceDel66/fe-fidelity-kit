@@ -357,7 +357,7 @@ profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib /
 
 ## 贡献
 
-欢迎 issue 与 PR。kit 刻意保持小而有主见；改动的门槛：
+欢迎 issue 与 PR。kit 刻意保持小而有主见。重要变更记录在 [CHANGELOG.md](CHANGELOG.md)。改动的门槛：
 
 - 保持 rules **stack-neutral** —— 具体名字属于 `profile.<field>`，不属于 `rules/` 或 `skills/`。
 - 保留那些**尖锐的坑**（具名陷阱、精确 px、逐字 gotcha）。泛化不得把它们磨钝。
