@@ -362,7 +362,7 @@ profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib /
 - 保持 rules **stack-neutral** —— 具体名字属于 `profile.<field>`，不属于 `rules/` 或 `skills/`。
 - 保留那些**尖锐的坑**（具名陷阱、精确 px、逐字 gotcha）。泛化不得把它们磨钝。
 - 维持**路径不变**的布局（相对交叉引用；共享文件不用 `${CLAUDE_PLUGIN_ROOT}`）。
-- 改完结构后跑一次 `node scripts/verify-kit.mjs` —— 它会自检 manifest 目录、相对交叉引用、**profile 字段契约**（rules/skills 引用的每个 `profile.*` 都在模板里有定义）、双语标题对称性，以及示例里没有残留的 `FILL:`。它对 CI 友好（失败时返回非零退出码）。*（已采纳 kit 的项目改用 `fidelity-adopt --verify`——那个需要一份填好的 profile；这个校验的是 kit 仓库自身。）*
+- 改完结构后跑一次 `node scripts/verify-kit.mjs` —— 它会自检 manifest 目录、相对交叉引用、**profile 字段契约**（rules/skills 引用的每个 `profile.*` 都在模板里有定义）、双语标题对称性、示例里没有残留的 `FILL:`，以及每个示例都填齐模板的每个字段（字段契约双向校验）。它对 CI 友好（失败时返回非零退出码）。*（已采纳 kit 的项目改用 `fidelity-adopt --verify`——那个需要一份填好的 profile；这个校验的是 kit 仓库自身。）*
 
 ---
 

@@ -362,7 +362,7 @@ Issues and PRs welcome. The kit is intentionally small and opinionated. Notable 
 - Keep the rules **stack-neutral** — concrete names belong in `profile.<field>`, not in `rules/` or `skills/`.
 - Preserve the **sharp edges** (named traps, exact px, verbatim gotchas). Genericizing must not blunt them.
 - Keep the **path-invariant** layout (relative cross-references; no `${CLAUDE_PLUGIN_ROOT}` in shared files).
-- After editing structure, run `node scripts/verify-kit.mjs` — it self-checks the manifest dirs, the relative cross-references, the **profile field contract** (every `profile.*` the rules/skills cite is defined in the template), bilingual heading symmetry, and that the examples carry no unfilled `FILL:`. It is CI-friendly (non-zero exit on failure). *(A project that adopted the kit runs `fidelity-adopt --verify` instead — that one needs a filled profile; this one checks the kit repo itself.)*
+- After editing structure, run `node scripts/verify-kit.mjs` — it self-checks the manifest dirs, the relative cross-references, the **profile field contract** (every `profile.*` the rules/skills cite is defined in the template), bilingual heading symmetry, that the examples carry no unfilled `FILL:`, and that every example defines every template field (the contract checked both ways). It is CI-friendly (non-zero exit on failure). *(A project that adopted the kit runs `fidelity-adopt --verify` instead — that one needs a filled profile; this one checks the kit repo itself.)*
 
 ---
 

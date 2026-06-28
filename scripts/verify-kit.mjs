@@ -108,6 +108,29 @@ if (exists(exDir))
     /FILL:/.test(read(rel)) ? bad(`${rel} still contains FILL:`) : ok(rel);
   }
 
+// 7. template fields ⊆ each example (no example silently dropped a field)
+section("examples define every template field");
+const yamlKeys = (s) => {
+  const block = s.match(/```yaml\n([\s\S]*?)```/);
+  const keys = new Set();
+  if (block)
+    for (const line of block[1].split("\n")) {
+      const km = line.match(/^\s*([A-Za-z_][\w]*):/);
+      if (km) keys.add(km[1]);
+    }
+  return keys;
+};
+const tplKeys = yamlKeys(tpl);
+if (exists(exDir))
+  for (const e of fs.readdirSync(path.join(ROOT, exDir))) {
+    if (!e.endsWith(".md")) continue;
+    const rel = path.join(exDir, e);
+    const missing = [...tplKeys].filter((k) => !yamlKeys(read(rel)).has(k));
+    missing.length
+      ? bad(`${rel} missing template field(s): ${missing.join(", ")}`)
+      : ok(`${rel} (${tplKeys.size} fields)`);
+  }
+
 console.log(
   `\n${fails ? "\x1b[31m✗" : "\x1b[32m✓"} ${checks - fails}/${checks} checks passed` +
     (fails ? `, ${fails} FAILED` : "") + "\x1b[0m"
