@@ -89,5 +89,6 @@ gate:
 
 ## Project notes
 
+- **Tailwind JIT only sees complete class literals.** A *dynamically assembled* arbitrary value — `shadow-[${x}]`, `text-[${n}px]`, `bg-${c}-500` — is never generated (the scanner sees the template literal, not the resolved class), so the style silently vanishes with no error. Put the WHOLE class in the data (`shadow: 'shadow-[0_30px_60px_rgba(0,0,0,0.5)]'` — string literals in an array/map ARE scanned) or move the dynamic value to inline `style`. Bites hardest in Zone 4, where exact px are written as arbitrary values.
 - render_kind = figma-inspect: measure the SOURCE box-model by hand from Figma Dev Mode (px shown in inspect), measure the TARGET via Playwright getComputedStyle, compare digit-by-digit. measure_capable stays true (target is measurable) but source side is manual — note any uncertainty in the gate.
 - i18n true: reproduce copy as message keys (react-intl), not literal English strings.
