@@ -1,6 +1,6 @@
 {
   "kit": "fe-fidelity-kit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "purpose": "Self-check manifest. fidelity-adopt --verify asserts these dirs exist and the cross-references resolve from their own locations (catches a partial drop-in copy that omitted rules/).",
   "requires_dirs": [
     "skills",

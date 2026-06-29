@@ -5,6 +5,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-29
+
 ### Added
 - Optional Memory / Harness interop bridge: `references/memory-harness-interop.md`, `profile.context.*`, bounded reuse packets in plan/build/handoff/review flows, and repo-harness report discoverability when target repos already expose harness artifacts.
 

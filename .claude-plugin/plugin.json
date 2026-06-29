@@ -1,6 +1,6 @@
 {
   "name": "fe-fidelity-kit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Stack-neutral toolkit for reproducing a design mockup into frontend code at 1:1 fidelity, with a cross-model executor/reviewer review gate. Methodology is portable; per-project bindings live in .claude/fidelity-profile.md.",
   "author": {
     "name": "yaocheng"
