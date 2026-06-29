@@ -40,14 +40,17 @@ context:                      # optional memory/harness bridge; never a hard dep
   privacy: "FILL: e.g. memory is advisory; repo/mockup/render wins; never include secrets or private unrelated chat"
 
 mockup:                       # the design SOURCE described by ROLE, not by a fixed repo shape
+  # Source SHAPE varies: SEPARATE FILES (render + styles.css + design-system.md + spec.md, distinct) OR an
+  # INLINE SINGLE FILE — a design-to-code export (v0 / Figma Make / a "dc" export) whose styles + tokens + spec
+  # all live in one inline-styled .html; then point styles/token_source/spec at that SAME file (see the "inline →" hints).
   render: "FILL: the loadable/inspectable visual truth, e.g. ../oa-mockup/index.html | http://localhost:4173 | figma-inspect-url"
   render_kind: "FILL: static-html | preview-url | storybook | figma-inspect | screenshots"
-  styles: "FILL: where the source's exact CSS lives to grep box-model, e.g. ../oa-mockup/styles.css | (n/a for figma)"
-  token_source: "FILL: source design-system / tokens, e.g. ../oa-mockup/design-system.md | Figma Variables export | tokens.json"
-  spec: "FILL (optional; render dominates spec): ../oa-mockup/spec.md | Linear ticket | Figma frame notes"
-  dialect: "FILL: the source's component vocabulary, e.g. shadcn/ui | Material | custom | unknown(discover from render)"
+  styles: "FILL: where the source's exact CSS lives to grep box-model, e.g. ../oa-mockup/styles.css | inline → the same .html (box-model is inline style — read it off each element) | (n/a for figma)"
+  token_source: "FILL: source design-system / tokens, e.g. ../oa-mockup/design-system.md | inline → the same .html (hardcoded hex — lift into token_sot BY VALUE) | Figma Variables export | tokens.json"
+  spec: "FILL (optional; render dominates spec): ../oa-mockup/spec.md | inline → the same .html (the inline-styled DOM IS the spec) | Linear ticket | Figma frame notes"
+  dialect: "FILL: the source's component vocabulary, e.g. shadcn/ui | Material | custom | raw inline-styled HTML (design-to-code export — treat <sc-if>/<sc-for>/{{ }} as conditionals/loops/slots, NOT real framework code) | unknown(discover from render)"
   refresh_cmd: "FILL (if source is a repo): e.g. git -C ../oa-mockup pull | (n/a)"
-  mockup_serve_url: "FILL (if applicable): URL the rendered mockup is served at for side-by-side, e.g. http://localhost:4173"
+  mockup_serve_url: "FILL (if applicable): URL the rendered mockup is served at for side-by-side, e.g. http://localhost:4173 | (n/a — a design-to-code export may not self-render without injecting a runtime)"
 
 commands:
   install: "FILL: e.g. pnpm install"

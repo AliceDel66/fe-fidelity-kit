@@ -67,7 +67,7 @@ These are visuals with no inherent semantic element to lean on — you build the
 
 Self-built containers (cards, panels — anything with **no** native equivalent in `profile.ui_lib`, that you hand-write in `profile.styling`) are where "looks right, actually off by 4–8px" lives. Root cause: approximating from a screenshot, or re-arranging the DOM. **The method is "measure", not "look":**
 
-1. **Find the mockup's class and read its CSS rule** (grep `profile.mockup.styles` for the class), copy the box-model field by field: `padding` / `gap` / `margin` / `border` (width+color) / `border-radius` / `line-height` / each child's `font-size`.
+1. **Find the mockup's class and read its CSS rule** (grep `profile.mockup.styles` for the class), copy the box-model field by field: `padding` / `gap` / `margin` / `border` (width+color) / `border-radius` / `line-height` / each child's `font-size`. *(Inline-single-file source — a design-to-code export with no separate stylesheet: there is no class rule to grep; the box-model sits on each element's `style="…"`. Read the values straight off the element in `profile.mockup.styles`, same field by field.)*
 2. **Map by VALUE, never by token NAME.** This is a procedure, not a lookup:
    - color / border-color / shadow → the token whose **value equals** the mockup's. *(illustrative: mockup `--card-border:#e2e8f0` = `colorBorderSecondary`.)*
    - **`border-radius` → the token whose NUMBER matches.** ⚠️ The classic trap: mockup `--radius-md: 8px` must bind to the token that **is 8** *(illustrative: `borderRadiusLG`)* — **NOT** the token that's merely *named* "md" *(illustrative: `borderRadius` = 6 in the reference stack)*. **Look up the actual number in `profile.token_sot` before choosing.**

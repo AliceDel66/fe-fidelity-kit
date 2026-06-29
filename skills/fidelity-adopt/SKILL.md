@@ -30,7 +30,7 @@ Probe the project and record findings; do NOT guess past the evidence.
 - **`tsconfig.json`** → `compilerOptions.paths` → import alias + what it maps to (root vs `src/`).
 - **Token SoT** candidates (search): `constants/theme.*`, `theme.ts`, `tailwind.config.*`, `tokens.*`, `**/*.css` containing `--` custom properties, `design-tokens*`.
 - **Placement**: `app/` present (App Router) → `app/<route>/_components/` + `components/`; else `src/components/` + `src/routes/<route>/components/` (adjust to what actually exists).
-- **Mockup source**: sibling dirs matching `../*mockup*` / `../*-design*`; any `spec.md` + `design-system.md` pair; a Storybook config; a Figma link in README/docs; git submodules.
+- **Mockup source**: sibling dirs matching `../*mockup*` / `../*-design*`; any `spec.md` + `design-system.md` pair; a single self-contained design-to-code export (one inline-styled `.html`, often v0 / Figma Make / a "dc" export, may carry `<sc-if>`/`<sc-for>`/`{{ }}` placeholders) → point `mockup.styles`/`mockup.token_source`/`mockup.spec` at that same file; a Storybook config; a Figma link in README/docs; git submodules.
 - **Runtime tool**: is a gstack `browse` skill available? `@playwright/test` / a Playwright MCP in deps? any configured browser MCP? → also decide `measure_capable` (can it return `getComputedStyle`/`getBoundingClientRect`? screenshot-only or Figma-only → false).
 - **Context backends (optional; never blocking)**:
   - `memory_backend` ← `claude-mem` if an installed claude-mem MCP/CLI is visible; `codex-memory` if `$HOME/.codex/memories/MEMORY.md` exists and is relevant; `repo-harness` if repo-local harness artifacts are the only memory surface; `custom` only when the user provides a query path; otherwise `none`.
