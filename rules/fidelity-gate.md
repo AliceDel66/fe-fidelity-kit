@@ -80,6 +80,13 @@ If `measure_capable: false`, the `-box.txt` file is replaced by a note of the so
 
 ## 4. Flow — one slice's handshake
 
+**Runtime preflight (before the first run — preconditions, not capabilities).** Capabilities (`measure_capable` / `state_drivable`, §3) *cap* the verdict yet leave the evidence valid; **a precondition that fails makes the evidence wrong.** Confirm these first:
+- **Anchoring** — the runtime tool points at *this* project root, not the session cwd. An MCP / preview often binds the process cwd, so a sibling-project or monorepo session loads/serves the wrong app (a `launch.json` / dev path pointing elsewhere). Anchor or `cd` first.
+- **It actually renders** — the page (`profile.commands.dev` → `profile.commands.dev_url`) and, for side-by-side, the mockup (`profile.mockup.mockup_serve_url`) really come up. A design-to-code export may not self-render without injecting a runtime — then compare against source values instead.
+- **Capabilities known** — `measure_capable` / `state_drivable` resolved, so the verdict ceiling is known up front (§3).
+
+A failed precondition is a **stop**, not a `[P1]` finding: fix the setup, then run — never attach evidence captured against the wrong target.
+
 1. **Executor** finishes → `profile.commands.lint` + `profile.commands.typecheck` + `profile.commands.test` green → **runs the page** for the §3 runtime checks (all green = "it runs") → captures screenshot / console / network / box-model evidence.
 2. **Loop Engineering (self-refactor before review).** Once the done-definition is green, the executor is authorized to **fully refactor** this slice toward the simplest shape:
    - native-first (swap any hand-rolled component the library already has, drop pointless style wrappers back to native + tokens);

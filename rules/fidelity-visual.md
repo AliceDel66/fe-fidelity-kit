@@ -118,6 +118,7 @@ Reproduction is **not** "wrote the code." It must clear:
 - **Static review by the reviewer** (`fidelity-review` command) — the style-match + behavior gate.
 
 Pre-completion check, on a measurable `render_kind`:
+0. **Runtime preflight first** (see `fidelity-gate.md` §4): the tool is anchored at *this* project (not the session cwd), the page/mockup actually render, and `measure_capable` / `state_drivable` are known. A failed precondition is a stop, not a finding — evidence captured against the wrong target is worse than none.
 1. Load your page and the mockup region at the **same viewport, 100% zoom** (different zoom misreads heights/spacing).
 2. Compare item by item: icons (same set / size / color), fonts (heading ramp inherited, not bare px), generated visuals (palette / shape / no extra elements), spacing / radius / shadow, **and interactive states**.
 3. **Box-model numbers**: pull your component's computed `padding` / `gap` / `border` / `border-radius` / `font-size` (via `profile.verify.recipe.box`) and compare **digit by digit** against the values you grepped from the mockup — catch the 4–8px drift screenshots hide.

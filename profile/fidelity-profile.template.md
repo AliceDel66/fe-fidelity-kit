@@ -67,7 +67,7 @@ verify:
   state_drivable: true        # CAN it trigger + capture :hover/:focus/:active/open (not just the resting shot)? false → Zone-5 static-only, gate notes "interaction UNDRIVEN" (e.g. a preview that measures but can't drive :hover)
   viewports: ["1440x900", "375x812"]   # FILL: viewports to verify
   evidence_dir: ".claude/.fidelity-evidence/"
-  recipe:                     # HOW to run each measurement with runtime_tool (stack-neutral rule says WHAT, this says HOW)
+  recipe:                     # HOW to run each measurement with runtime_tool. First run: clear the gate's runtime preflight (anchor to THIS project, not the session cwd; confirm the page/mockup render). Rule says WHAT, this says HOW.
     load: "FILL: e.g. browse goto <url>"
     screenshot: "FILL: e.g. browse screenshot <path>"
     box: "FILL: computed box-model, e.g. browse inspect '<sel>' | browse css '<sel>' <prop>"
