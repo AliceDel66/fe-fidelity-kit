@@ -61,6 +61,7 @@ commands:
 verify:
   runtime_tool: "Playwright MCP"
   measure_capable: true         # Playwright getComputedStyle/boundingClientRect works on Vue-rendered DOM exactly the same — measurement is framework-agnostic
+  state_drivable: true          # Playwright browser_hover / browser_click drives Zone-5 states, then screenshot
   viewports: ["1440x900", "375x812"]
   evidence_dir: ".claude/.fidelity-evidence/"
   recipe:

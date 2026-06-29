@@ -42,7 +42,7 @@
 - [Profile —— 那 20%](#profile--那-20)
 - [Memory / Harness Interop](#memory--harness-interop)
 - [能力阶梯](#能力阶梯)
-- [会给 gate 设上限的两种情况](#会给-gate-设上限的两种情况)
+- [会给 gate 设上限的情况](#会给-gate-设上限的情况)
 - [它如何同时做到可移植与具体](#它如何同时做到可移植与具体)
 - [FAQ](#faq)
 - [贡献](#贡献)
@@ -212,7 +212,7 @@ executor 的证据不是零散截图 —— 它遵循一套命名契约（`<rout
   Recommendation: <一个具体动作> because <最重要的那条 finding>
   ```
 
-> **reviewer 给 PASS 从不等于「页面渲染正确」。** 运行时的 layout/overflow/console/box-model 是 executor 的职责，且是 PASS 的*前提* —— 关于 single-model 与无法测量两种降级，见[设上限的情况](#会给-gate-设上限的两种情况)。
+> **reviewer 给 PASS 从不等于「页面渲染正确」。** 运行时的 layout/overflow/console/box-model 是 executor 的职责，且是 PASS 的*前提* —— 关于 single-model / 无法测量 / 无法驱动状态等降级，见[设上限的情况](#会给-gate-设上限的情况)。
 
 ---
 
@@ -333,10 +333,11 @@ Memory 与 repo-harness 支持都是可选的。当 `profile.context.memory_back
 
 ---
 
-## 会给 gate 设上限的两种情况
+## 会给 gate 设上限的情况
 
 - **只有一个模型可用？** 没有第二个 host 时，gate 降级为**同模型两遍**：构建 → 清空上下文 / 新会话 → 以 Reviewer 身份审 diff。在独立性上明确更弱，但证据契约与 `[P1]/[P2]` + `Gate:` 结论都保留。报告头部标注 `degraded: single-model two-pass`。
 - **运行时工具无法测量？** 若 `profile.verify.measure_capable: false`（只能截图、只有 Figma、或根本没浏览器），executor 无法满足「量而非估」。此时能拿到的最好结论是 `Gate: PASS (visual-only — box-model UNVERIFIED)` —— **永远不是干净的 PASS** —— 且 `fidelity-adopt` 会提示你装一个有测量能力的工具（headless-browser skill / Playwright）。
+- **运行时工具无法驱动状态？** 若 `profile.verify.state_drivable: false`（预览只能截静止 DOM，无法触发 `:hover` / `:focus` / `:active` / 打开），Zone-5 交互态无法被驱动。executor 从源的规则复刻这些状态、reviewer 在代码里确认状态 class/handler 已写，但结论带上 `interaction UNDRIVEN` —— 对有状态的 UI 永远不是干净的 PASS。`measure_capable` 与 `state_drivable` 正交：任一为 false 都各自封顶，且可叠加。
 
 ---
 
@@ -354,7 +355,7 @@ Memory 与 repo-harness 支持都是可选的。当 `profile.context.memory_back
 不会 —— 这正是重点。方法论是 stack-neutral 的，你的技术栈活在 profile 里。随包的范例特意横跨 React（AntD、Tailwind/Radix）与 Vue（Nuxt UI）。
 
 **我必须有两个不同的模型吗？**
-不必，但那是最强模式。只有一个模型时，gate 降级为新上下文两遍（见[设上限的情况](#会给-gate-设上限的两种情况)）。
+不必，但那是最强模式。只有一个模型时，gate 降级为新上下文两遍（见[设上限的情况](#会给-gate-设上限的情况)）。
 
 **如果我的设计源只有截图 / Figma 呢？**
 仍然能用，只是上限更低 —— 见[能力阶梯](#能力阶梯)。gate 会诚实地封顶，而不是造假。

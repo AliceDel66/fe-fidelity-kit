@@ -57,6 +57,16 @@ Gate: PASS (visual-only — box-model UNVERIFIED)
 
 — never a clean PASS. The reviewer states box-model items as UNVERIFIED rather than PASSED, and `fidelity-adopt` should nudge installing a measurement-capable tool (e.g. a headless-browser skill / Playwright).
 
+### state_drivable clause (Zone-5 interaction is a second, independent ceiling)
+
+`measure_capable` and `state_drivable` are **orthogonal**: a tool can return `getComputedStyle` yet be unable to **drive** an interactive state (e.g. a preview that screenshots the resting DOM but never fires `:hover` / `:focus` / `:active` / open). If `profile.verify.state_drivable: false`, the executor **cannot** satisfy Zone 5's "drive the state, don't trust the resting shot." The best attainable verdict then carries:
+
+```
+Gate: PASS (interaction UNDRIVEN — Zone-5 states static-only)
+```
+
+— the executor still reproduces each state from the source's `:hover` / `:focus` rules and the reviewer confirms the state classes/handlers exist in code, but no `*-hover-*` / `*-focus-*` driven screenshot can be produced; state those items UNDRIVEN, not PASSED. **The two ceilings stack**: when measurement *and* driving are both unavailable the tail reads `Gate: PASS (visual-only — box-model UNVERIFIED; interaction UNDRIVEN)`. `fidelity-adopt` nudges installing a tool that can drive states where Zone-5 fidelity matters.
+
 ### Evidence layout & naming (the executor → reviewer contract)
 
 The reviewer can't run the page — it only reads what the executor left, so evidence is a **contract**, not loose files. Put everything under `profile.verify.evidence_dir` with predictable names, so a visual finding can cite a file the way a code finding cites `file:line`:
@@ -66,7 +76,7 @@ The reviewer can't run the page — it only reads what the executor left, so evi
 - **Runtime health** — `<route>-console.txt` (errors) + `<route>-network.txt` (failed requests). An empty file means "checked, clean"; a *missing* file is not evidence.
 - **Citing it** — the executor's submission (handoff notes / PR body) lists the evidence paths; the reviewer cites them in findings ("box drift — `dashboard-box.txt`, row `.stat-card`"). A visual `[P1]/[P2]` with no citable evidence is itself the finding (per §3).
 
-If `measure_capable: false`, the `-box.txt` file is replaced by a note of the source CSS values used (the target is unmeasurable) — screenshots, console, network, responsive are still all required.
+If `measure_capable: false`, the `-box.txt` file is replaced by a note of the source CSS values used (the target is unmeasurable) — screenshots, console, network, responsive are still all required. If `state_drivable: false`, the `*-hover-*` / `*-focus-*` driven screenshots are replaced by a note of the source `:hover` / `:focus` rules reproduced + the code location of the state classes/handlers (the state can't be fired) — the resting screenshot, console, network, responsive are still all required.
 
 ## 4. Flow — one slice's handshake
 

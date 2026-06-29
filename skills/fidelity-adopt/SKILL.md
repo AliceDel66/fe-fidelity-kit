@@ -31,7 +31,7 @@ Probe the project and record findings; do NOT guess past the evidence.
 - **Token SoT** candidates (search): `constants/theme.*`, `theme.ts`, `tailwind.config.*`, `tokens.*`, `**/*.css` containing `--` custom properties, `design-tokens*`.
 - **Placement**: `app/` present (App Router) → `app/<route>/_components/` + `components/`; else `src/components/` + `src/routes/<route>/components/` (adjust to what actually exists).
 - **Mockup source**: sibling dirs matching `../*mockup*` / `../*-design*`; any `spec.md` + `design-system.md` pair; a single self-contained design-to-code export (one inline-styled `.html`, often v0 / Figma Make / a "dc" export, may carry `<sc-if>`/`<sc-for>`/`{{ }}` placeholders) → point `mockup.styles`/`mockup.token_source`/`mockup.spec` at that same file; a Storybook config; a Figma link in README/docs; git submodules.
-- **Runtime tool**: is a gstack `browse` skill available? `@playwright/test` / a Playwright MCP in deps? any configured browser MCP? → also decide `measure_capable` (can it return `getComputedStyle`/`getBoundingClientRect`? screenshot-only or Figma-only → false).
+- **Runtime tool**: is a gstack `browse` skill available? `@playwright/test` / a Playwright MCP in deps? any configured browser MCP? → also decide `measure_capable` (can it return `getComputedStyle`/`getBoundingClientRect`? screenshot-only or Figma-only → false) **and `state_drivable`** (can it fire + capture `:hover`/`:focus`/`:active`/open? a measure-only preview that can't drive states → false — the two are orthogonal).
 - **Context backends (optional; never blocking)**:
   - `memory_backend` ← `claude-mem` if an installed claude-mem MCP/CLI is visible; `codex-memory` if `$HOME/.codex/memories/MEMORY.md` exists and is relevant; `repo-harness` if repo-local harness artifacts are the only memory surface; `custom` only when the user provides a query path; otherwise `none`.
   - `harness_backend` ← `repo-harness` only when `.ai/harness/`, repo-harness task/check/review artifacts, or an explicit repo-harness config exists; otherwise `none`.
@@ -46,7 +46,7 @@ Confirm the detected summary, then ask only what detection couldn't settle:
 - Detected stack summary — accept or edit (framework / ui_lib / styling / icon_lib / chart_lib).
 - **Mockup**: `render` path/URL + `render_kind` + `dialect` (+ `styles` location, `refresh_cmd`, `mockup_serve_url`) if not detected.
 - **Token SoT** if multiple candidates, and `token_access` (how a component reads a token).
-- **Runtime tool** + **is it measure_capable?** (this gates how strong the gate can be — see `fidelity-gate.md`).
+- **Runtime tool** + **is it measure_capable?** + **is it state_drivable?** (these two orthogonal axes gate how strong the gate can be — see `fidelity-gate.md`).
 - **copy_language** + `i18n`.
 - Confirm placement pattern + AHA threshold (default 2).
 - **Context backend** only if ambiguous: choose `memory_backend` / `harness_backend`, or confirm `none`. Missing backends are fine; never require installation during adopt.
@@ -80,6 +80,7 @@ After writing (or when invoked as `fidelity-adopt --verify`), assert:
 - `context.memory_backend` is one of `none | claude-mem | codex-memory | repo-harness | custom`; `context.harness_backend` is one of `none | repo-harness`; backend absence is informational, not an error.
 - The kit's cross-references (the `cross_refs` list in `kit-manifest.json` is the SoT — don't hardcode a count) resolve **from their own locations**: `skills/*/SKILL.md → ../../rules/*.md` (and adopt → `../../profile/…`), `commands/fidelity-review.md → ../rules/*.md` (guards against a partial drop-in copy that omitted `rules/` or `profile/`). If the kit is installed as a plugin, this check is informational; in drop-in mode it catches a broken copy.
 - `measure_capable: false` → print a loud note: the gate is capped to `PASS (visual-only — box-model UNVERIFIED)`; suggest installing a measurement-capable browser (a headless-browse skill / Playwright).
+- `state_drivable: false` → print a loud note: Zone-5 interactive states can't be driven, so the gate carries `interaction UNDRIVEN` (states confirmed from the source's rules + code only, no driven screenshot); suggest a state-driving tool where hover/focus fidelity matters.
 
 ## Hard guarantees
 - Reads everything; writes only `./.claude/fidelity-profile.md` (+ optional `.review.md`) and the marked CLAUDE.md block.
@@ -91,4 +92,4 @@ After writing (or when invoked as `fidelity-adopt --verify`), assert:
 - [ ] Asked only the gaps (batched), preferring AskUserQuestion
 - [ ] Wrote `.claude/fidelity-profile.md` (or `.review.md` if one existed), `TODO(adopt:…)` for unknowns, seeded maps non-exhaustively
 - [ ] Idempotent CLAUDE.md marker block added
-- [ ] `--verify` passed; measure_capable note printed if false
+- [ ] `--verify` passed; measure_capable / state_drivable notes printed if either is false

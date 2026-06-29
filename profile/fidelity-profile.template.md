@@ -64,6 +64,7 @@ commands:
 verify:
   runtime_tool: "FILL: the browser driver, e.g. gstack browse skill | Playwright MCP | (none)"
   measure_capable: true       # CAN it return getComputedStyle / getBoundingClientRect? false → gate capped to visual-only (see fidelity-gate.md)
+  state_drivable: true        # CAN it trigger + capture :hover/:focus/:active/open (not just the resting shot)? false → Zone-5 static-only, gate notes "interaction UNDRIVEN" (e.g. a preview that measures but can't drive :hover)
   viewports: ["1440x900", "375x812"]   # FILL: viewports to verify
   evidence_dir: ".claude/.fidelity-evidence/"
   recipe:                     # HOW to run each measurement with runtime_tool (stack-neutral rule says WHAT, this says HOW)

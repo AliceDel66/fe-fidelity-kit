@@ -58,6 +58,7 @@ commands:
 verify:
   runtime_tool: "gstack browse skill (shared headless Chromium; do NOT install Playwright/puppeteer)"
   measure_capable: true
+  state_drivable: true        # gstack browse can hover/focus/click then screenshot
   viewports: ["1440x900", "375x812"]
   evidence_dir: ".claude/.fidelity-evidence/"
   recipe:

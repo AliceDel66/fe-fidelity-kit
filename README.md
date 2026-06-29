@@ -212,7 +212,7 @@ The executor's evidence isn't loose screenshots — it follows a naming contract
   Recommendation: <one concrete action> because <the single most important finding>
   ```
 
-> **A reviewer PASS never means "the page renders right."** Runtime layout/overflow/console/box-model are the executor's job and a *precondition* of PASS — see [Caveats](#caveats-that-cap-the-gate) for the single-model and measurement-incapable degradations.
+> **A reviewer PASS never means "the page renders right."** Runtime layout/overflow/console/box-model are the executor's job and a *precondition* of PASS — see [Caveats](#caveats-that-cap-the-gate) for the single-model, measurement-incapable, and state-undrivable degradations.
 
 ---
 
@@ -337,6 +337,7 @@ How strong your verification — and therefore the gate — can be depends on wh
 
 - **Single model available?** With no second host, the gate degrades to a **same-model two-pass**: build → clear context / fresh session → review the diff as Reviewer. Explicitly weaker on independence, but the evidence contract and the `[P1]/[P2]` + `Gate:` verdict are preserved. The report header states `degraded: single-model two-pass`.
 - **Runtime tool can't measure?** If `profile.verify.measure_capable: false` (screenshot-only, Figma-only, or no browser), the executor can't satisfy "measure, don't overlay." The best attainable verdict is `Gate: PASS (visual-only — box-model UNVERIFIED)` — **never a clean PASS** — and `fidelity-adopt` nudges you to install a measurement-capable tool (a headless-browser skill / Playwright).
+- **Runtime tool can't drive states?** If `profile.verify.state_drivable: false` (a preview that measures the resting DOM but can't fire `:hover` / `:focus` / `:active` / open), Zone-5 states can't be driven. The executor reproduces them from the source's rules and the reviewer confirms the state classes/handlers in code, but the verdict carries `interaction UNDRIVEN` — never a clean PASS for stateful UI. `measure_capable` and `state_drivable` are orthogonal: either cap applies on its own, and they stack.
 
 ---
 

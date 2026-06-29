@@ -57,6 +57,7 @@ commands:
 verify:
   runtime_tool: "Playwright MCP"
   measure_capable: true       # Playwright can getComputedStyle/boundingClientRect on the TARGET; SOURCE (Figma) is measured by hand from inspect → partial-degrade
+  state_drivable: true        # Playwright browser_hover / browser_click drives Zone-5 states on the target (Figma source has no live states to drive)
   viewports: ["1280x800", "390x844"]
   evidence_dir: ".claude/.fidelity-evidence/"
   recipe:

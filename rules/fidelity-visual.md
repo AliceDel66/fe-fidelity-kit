@@ -29,6 +29,7 @@ The single most common way reproduction goes wrong: reading the spec/ticket text
   | `static-html` / `preview-url` / `storybook` | loadable in a browser | ✅ full (`getComputedStyle` on both sides) |
   | `figma-inspect` | inspectable, not a live DOM | ⚠️ source measured by hand from Figma inspect, target by tool |
   | `screenshots` | pixels only | ❌ degraded — measure target only, eyeball the source; gate is capped (see `fidelity-gate.md`) |
+- **Two runtime capabilities, orthogonal.** The render_kind ladder above gauges **box-model measurability** (`profile.verify.measure_capable`, Zone 4). Whether the tool can **drive interactive states** (`profile.verify.state_drivable`, Zone 5) is a *separate* axis — a tool can measure `getComputedStyle` yet never fire `:hover` / `:focus` (e.g. a static preview). Either one being false caps the gate; see `fidelity-gate.md`.
 
 ## 2. The five disaster zones
 
@@ -84,7 +85,7 @@ Hover / focus / active / disabled, transitions, and overlay z-index / stacking a
 
 - Reproduce each interactive state the mockup defines (read `profile.mockup.styles` for `:hover` / `:focus` / `:active` / `[disabled]` / `.is-open` rules), including transition duration/easing (token via `profile.token_access` where available).
 - Overlay layers (modal / drawer / popover / toast) must match the mockup's stacking order — bind z-index to tokens if the project has a z-scale (`profile.token_sot`).
-- Verification means **driving the state** in the runtime tool (hover, focus, open), not just capturing the resting state.
+- Verification means **driving the state** in the runtime tool (hover, focus, open), not just capturing the resting state. *(If `profile.verify.state_drivable: false` — the tool can't fire these — reproduce each state from the source's rules and confirm the state classes/handlers in code, but the gate carries `interaction UNDRIVEN` per `fidelity-gate.md`; never claim a driven state you couldn't actually fire.)*
 
 ## 3. Native-component-first (don't re-implement what the library already has)
 
