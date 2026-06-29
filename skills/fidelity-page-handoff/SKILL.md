@@ -1,6 +1,6 @@
 ---
 name: fidelity-page-handoff
-description: Produce a ready-to-paste prompt that hands a 1:1 mockup-reproduction page to a DIFFERENT model/host (e.g. Codex) — either as the EXECUTOR (build or fix the page) or as the read-only REVIEWER (run the cross-model gate on the diff + evidence). Auto-fills the spec slice, the done-definition, Loop Engineering, and the [P1]/[P2] + Gate verdict handshake from .claude/fidelity-profile.md. Use when another host should build, fix, or review a page and you need the prompt. Triggers: hand off page, dispatch page, prompt for codex, give me an executor prompt, hand off review, cross-model review prompt, reviewer prompt for codex.
+description: Produce a ready-to-paste prompt that hands a 1:1 mockup-reproduction page to a DIFFERENT model/host (e.g. Codex) — either as the EXECUTOR (build or fix the page) or as the read-only REVIEWER (run the cross-model gate on the diff + evidence), including an optional memory/harness reuse packet for known traps and prior gate failures. Auto-fills the spec slice, the done-definition, Loop Engineering, and the [P1]/[P2] + Gate verdict handshake from .claude/fidelity-profile.md. Use when another host should build, fix, or review a page and you need the prompt. Triggers: hand off page, dispatch page, prompt for codex, give me an executor prompt, hand off review, cross-model review prompt, reviewer prompt for codex.
 ---
 
 # Hand a page to another host — build or review (emit the prompt)
@@ -16,14 +16,16 @@ description: Produce a ready-to-paste prompt that hands a 1:1 mockup-reproductio
 - Read `./.claude/fidelity-profile.md` (project root). Missing → tell the user to run `fidelity-adopt` first.
 - Read `./.claude/fidelity-plan.md` if it exists — pull this page's planned components from §A3 (which are **shared** vs **page-local**) and inline them into the prompt below. The external executor can't see the plan file, so you carry the slice in. You (orchestrator) own the plan and **sync its Part B** after the handoff returns (see Wrap-up).
 - Read `../../rules/fidelity-gate.md` for the gate vocabulary the prompt must hand-shake with. (You don't need to re-read `fidelity-visual.md` — the prompt points the other host at it.)
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and carry a bounded reuse packet into the emitted prompt.
 - You may read `profile.mockup.spec` **only** to resolve the right spec section. Do not pull, build, or edit anything.
 
 ## What you do (produce a prompt; don't build)
 
 1. **Pick the mode**: brand-new page → Template A; fix an existing page → Template B; **have a different host review a built page → Template C**. If unclear which page, ask first.
 2. **Resolve the spec section**: read the heading index of `profile.mockup.spec`, map the user's page to its section, fill `<spec-section>`. If you can't map it, keep a placeholder and ask the user to confirm.
-3. **Fill from profile**: substitute every `{{profile.*}}` placeholder below with the real value from `./.claude/fidelity-profile.md`. Fill `<page-name>` / `<route>` from the user.
-4. **Output**: put the filled prompt in a single fenced code block, verbatim, nothing extra around it.
+3. **Resolve the reuse packet**: if context backends are enabled, query by project + page/route + `profile.ui_lib` + `profile.icon_lib` + `Gate: FAIL` + `token trap` + `box-model`; include 3-5 advisory facts max. If none, write `Reuse packet: none`.
+4. **Fill from profile**: substitute every `{{profile.*}}` placeholder below with the real value from `./.claude/fidelity-profile.md`. Fill `<page-name>` / `<route>` from the user.
+5. **Output**: put the filled prompt in a single fenced code block, verbatim, nothing extra around it.
 
 > The prompt already tells the executor to pull the source, run the page with `{{profile.verify.runtime_tool}}`, do Loop Engineering, and run the gate. Do not add steps.
 
@@ -39,6 +41,9 @@ Before you start (don't work from memory):
 2. Read {{profile.mockup.spec}} section "<spec-section>" + {{profile.mockup.token_source}} for the relevant tokens.
 3. Open the render {{profile.mockup.render}} ({{profile.mockup.render_kind}}) and look at the RENDERED result — not just the spec text. When they disagree, the render wins.
 4. The fidelity rules are the SoT: read fidelity-visual.md (the five disaster zones) and fidelity-gate.md (the gate).
+
+Reuse packet (advisory, verify against the current render; memory never overrides source):
+<3-5 known traps / prior [P1] / evidence to re-check, or "Reuse packet: none">
 
 Reproduction constraints (the five places 1:1 dies):
 - Icons: named import from {{profile.icon_lib}} (source icon id kebab→Pascal); do NOT substitute a different icon family for app/nav glyphs. The library's own built-in glyphs stay native.
@@ -82,6 +87,9 @@ Before you start:
 2. Open the render {{profile.mockup.render}} and your page ({{profile.commands.dev}} → {{profile.commands.dev_url}}<route>) side by side.
 3. The SoT is fidelity-visual.md (five disaster zones) + fidelity-gate.md (gate).
 
+Reuse packet (advisory, verify against the current render; memory never overrides source):
+<3-5 known traps / prior [P1] / evidence to re-check, or "Reuse packet: none">
+
 What to do: align the rendered result block by block — icons ({{profile.icon_lib}}), heading fonts (via {{profile.token_access}}, not bare div), generated visuals (structure + token palette, no re-palette/extra labels), hand-built container box-model (grep {{profile.mockup.styles}} for the class; padding/gap/border/border-radius to value-equal tokens or exact px; copy DOM structure, inline stays inline), interactive states. First list every mismatch, then fix item by item. Component placement follows the build plan (§A3): shared → {{profile.shared_components_dir}} (reuse, don't duplicate); page-local → {{profile.page_components_pattern}}.
 
 Done-definition (same as fidelity-gate.md; runtime via {{profile.verify.runtime_tool}}, no separate browser):
@@ -103,10 +111,12 @@ Read first (the SoT — don't work from memory):
 1. fidelity-gate.md — roles + the [P1]/[P2] -> PASS/FAIL verdict and the runtime != static boundary.
 2. fidelity-visual.md — the five disaster zones + the UI style-match signals.
 3. For context only: {{profile.mockup.spec}} section "<spec-section>" + {{profile.mockup.token_source}} for the intended tokens.
+4. Reuse packet (advisory): <3-5 known traps / prior [P1] / evidence to re-check, or "Reuse packet: none">.
 
 What to review:
 - The change: <diff locator — e.g. `git diff <base>..HEAD` where <base> = the repo's default branch, or the explicit list of changed files>.
 - The executor's runtime evidence (they already ran the page): screenshots / console / box-model under {{profile.verify.evidence_dir}}, named per fidelity-gate.md's evidence contract (`<route>-<state>-<viewport>.png`, `<route>-box.txt`, …).
+- If {{profile.context.harness_backend}} is `repo-harness`, also check the repo-local harness review/check/handoff artifacts under {{profile.context.harness_artifact_root}} when present; do not require repo-harness if absent.
 
 Audit — tag EVERY finding [P1] (must-fix -> FAIL) or [P2] (suggestion):
 - Behavior: spec/behavior drift, swallowed errors (try/catch, ?., ?? hiding a real failure), missing edge/failure paths (empty/null/0/loading/failed/unauthorized/overflowing text), tautological tests, broken public interface, races.

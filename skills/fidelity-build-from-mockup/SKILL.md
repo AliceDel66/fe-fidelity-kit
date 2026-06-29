@@ -1,6 +1,6 @@
 ---
 name: fidelity-build-from-mockup
-description: Reproduce a design mockup (a render + design tokens + optional spec) into framework code at 1:1 fidelity — native-component-first, token-by-value, the five disaster zones, measured box-model verification. Stack-neutral; reads bindings from .claude/fidelity-profile.md. Use when implementing/reproducing a UI page or component FROM a design source. The model itself is the executor here (for handing the page to a different model/host, use fidelity-page-handoff instead).
+description: Reproduce a design mockup (a render + design tokens + optional spec) into framework code at 1:1 fidelity — native-component-first, token-by-value, the five disaster zones, measured box-model verification, with an optional memory/harness reuse packet for known traps and prior gate failures. Stack-neutral; reads bindings from .claude/fidelity-profile.md. Use when implementing/reproducing a UI page or component FROM a design source. The model itself is the executor here (for handing the page to a different model/host, use fidelity-page-handoff instead).
 ---
 
 # Reproduce a page from a mockup (1:1)
@@ -14,6 +14,7 @@ description: Reproduce a design mockup (a render + design tokens + optional spec
 - **Read `./.claude/fidelity-profile.md`** (relative to the project root). **Missing → STOP and run `fidelity-adopt`** — do not guess the stack. Every `profile.X` below comes from there.
 - **Read `./.claude/fidelity-plan.md` if it exists** — its §A3 tells you this page's planned components and their **shared vs page-local** placement (from the up-front survey), and §A5 the build order. Absent + the mockup is multi-page → suggest running `fidelity-plan` first. You will also **sync its Part B** after the gate (§7).
 - **Read `../../rules/fidelity-visual.md`** and **`../../rules/fidelity-gate.md`** (relative to this skill file). They are the methodology SoT; this skill is the procedure.
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and prepare a bounded reuse packet for this page.
 - If any `profile` field you need is `TODO(adopt:…)`, ask the user for it now rather than guessing.
 
 ## 1. Pull the source + look at the render (not just the text)
@@ -22,6 +23,17 @@ description: Reproduce a design mockup (a render + design tokens + optional spec
 - Read the **spec** (`profile.mockup.spec`) for the target page — layout, components, interactions, data, tokens. Items marked *(stub)* are not yet backend-wired.
 - Read the **token source** (`profile.mockup.token_source`) for the relevant tokens / type scale / icon set.
 - **Open the render** (`profile.mockup.render`, kind `profile.mockup.render_kind`) and SEE what it actually looks like — when text and render disagree, the render wins.
+
+### Optional reuse packet (advisory)
+
+If context backends are enabled, query by project + target page/route + `profile.ui_lib` + `profile.icon_lib` + `Gate: FAIL` + `token trap` + `box-model`. Extract at most `profile.context.reuse_packet_limit` facts:
+
+- prior `[P1]` fidelity failures to avoid;
+- token/radius/color traps to re-check by value;
+- box-model or DOM-structure traps to measure now;
+- evidence paths that should exist or be regenerated.
+
+Write the packet into your working notes or handoff notes. It is not authority: current render + source CSS + profile + runtime evidence win.
 
 ## 2. Map components — native-first + discover-and-extend
 
@@ -79,6 +91,7 @@ Once `Gate: PASS`, update `.claude/fidelity-plan.md` **Part B** (the sync contra
 ## Checklist
 - [ ] Loaded `profile` + both rules; resolved any `TODO(adopt:…)` fields
 - [ ] Pulled the source and **looked at the render** (not just spec text)
+- [ ] Built a bounded reuse packet when `profile.context.*` is enabled; treated it as advisory
 - [ ] Native-first via profile's component map; appended any newly-discovered component
 - [ ] Z1 icons from `profile.icon_lib`; Z2 headings via `profile.token_access` (no bare-div px); Z3 generated visuals match structure (if present); Z4 box-model grepped + value-equal tokens + exact px + DOM copied; Z5 states reproduced
 - [ ] Placement follows the plan's §A3 (shared vs page-local); no plan → AHA default

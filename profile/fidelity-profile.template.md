@@ -31,6 +31,14 @@ paths:
   page_components_pattern: "FILL: e.g. app/<route>/_components/ | src/routes/<route>/components/"
   promote_to_shared_after_uses: 2          # AHA threshold: lift page-local → shared on the Nth use
 
+context:                      # optional memory/harness bridge; never a hard dependency
+  memory_backend: "none"      # none | claude-mem | codex-memory | repo-harness | custom
+  memory_query: "FILL: how to query reusable observations, e.g. search by project + route + ui_lib + Gate: FAIL + token trap | (n/a)"
+  harness_backend: "none"     # none | repo-harness
+  harness_artifact_root: "FILL: e.g. .ai/harness | tasks | (n/a)"
+  reuse_packet_limit: 5       # max advisory facts to carry into plan/build/handoff/review
+  privacy: "FILL: e.g. memory is advisory; repo/mockup/render wins; never include secrets or private unrelated chat"
+
 mockup:                       # the design SOURCE described by ROLE, not by a fixed repo shape
   render: "FILL: the loadable/inspectable visual truth, e.g. ../oa-mockup/index.html | http://localhost:4173 | figma-inspect-url"
   render_kind: "FILL: static-html | preview-url | storybook | figma-inspect | screenshots"

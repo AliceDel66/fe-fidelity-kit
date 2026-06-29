@@ -30,6 +30,14 @@ paths:
   page_components_pattern: "app/pages/<route>/ (colocated) or app/components/<Route>/ (Nuxt auto-imports by path)"
   promote_to_shared_after_uses: 2
 
+context:
+  memory_backend: "none"
+  memory_query: "(n/a)"
+  harness_backend: "none"
+  harness_artifact_root: "(n/a)"
+  reuse_packet_limit: 5
+  privacy: "memory is advisory; repo/mockup/render wins; never include secrets or private unrelated chat"
+
 mockup:
   render: "../oa-mockup/index.html (static export of the design)"
   render_kind: "static-html"

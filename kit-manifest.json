@@ -6,7 +6,8 @@
     "skills",
     "commands",
     "rules",
-    "profile"
+    "profile",
+    "references"
   ],
   "components": {
     "skills": [
@@ -22,7 +23,10 @@
       "rules/fidelity-visual.md",
       "rules/fidelity-gate.md"
     ],
-    "profile_template": "profile/fidelity-profile.template.md"
+    "profile_template": "profile/fidelity-profile.template.md",
+    "references": [
+      "references/memory-harness-interop.md"
+    ]
   },
   "cross_refs": [
     { "from": "skills/fidelity-plan/SKILL.md", "to": "../../rules/fidelity-visual.md" },
@@ -31,8 +35,14 @@
     { "from": "skills/fidelity-build-from-mockup/SKILL.md", "to": "../../rules/fidelity-gate.md" },
     { "from": "skills/fidelity-page-handoff/SKILL.md", "to": "../../rules/fidelity-gate.md" },
     { "from": "skills/fidelity-adopt/SKILL.md", "to": "../../profile/fidelity-profile.template.md" },
+    { "from": "skills/fidelity-adopt/SKILL.md", "to": "../../references/memory-harness-interop.md" },
+    { "from": "skills/fidelity-plan/SKILL.md", "to": "../../references/memory-harness-interop.md" },
+    { "from": "skills/fidelity-build-from-mockup/SKILL.md", "to": "../../references/memory-harness-interop.md" },
+    { "from": "skills/fidelity-page-handoff/SKILL.md", "to": "../../references/memory-harness-interop.md" },
     { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-gate.md" },
-    { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-visual.md" }
+    { "from": "commands/fidelity-review.md", "to": "../rules/fidelity-visual.md" },
+    { "from": "commands/fidelity-review.md", "to": "../references/memory-harness-interop.md" },
+    { "from": "rules/fidelity-gate.md", "to": "../references/memory-harness-interop.md" }
   ],
   "project_profile_path": ".claude/fidelity-profile.md",
   "selfcheck_script": "scripts/verify-kit.mjs"

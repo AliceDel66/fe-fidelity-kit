@@ -12,6 +12,7 @@ You are the **Reviewer** for this change, not the executor. Audit the code chang
 
 - Read `./.claude/fidelity-profile.md` (project root). **Missing → tell the user to run `fidelity-adopt`** and stop. All stack-specific checks below resolve against `profile.*`.
 - Read `../rules/fidelity-gate.md` (relative to this command file) for roles + verdict rules, and `../rules/fidelity-visual.md` for the UI style-match signals.
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../references/memory-harness-interop.md`; use it only to build an advisory reuse packet and map evidence into repo-local artifacts.
 
 ### Roles & verdict (per `fidelity-gate.md`)
 
@@ -43,6 +44,8 @@ Set `<review-name>` = `YYYY-MM-DD-short-kebab` (from branch / commit message; ad
 - **whole project** (`all`): scan the source dirs (exclude `node_modules/`, build output) — review by module, no diff file.
 
 `<report_dir>` = the directory part of `profile.gate.report_path` (e.g. `.claude/review/`); `mkdir -p` it.
+
+If `profile.context.harness_backend` is `repo-harness` and `profile.context.harness_artifact_root` exists, treat it as an additional discoverability surface for the same review. Keep `profile.gate.report_path` canonical; mirror/link/summarize there only if the harness path already exists. Do not install repo-harness or fail the review when the harness path is absent.
 
 ### Step 2 — review focus (tag every finding [P1]/[P2])
 
@@ -93,6 +96,7 @@ Save to `profile.gate.report_path` (a fresh `Write` of the report — the review
 - Findings: 🔴 [P1] N / 🟡🔵 [P2] N
 - Executor runtime evidence (screenshots / console / network): yes / no (no → affects visual-item verdicts)
 - measure_capable: true / false (false → box-model UNVERIFIED) ; degraded: single-model? 
+- Context bridge: memory_backend=<profile.context.memory_backend> ; harness_backend=<profile.context.harness_backend> ; reuse packet=<none|N facts>
 - Diff: <report_dir>/diff/<review-name>.diff
 ### 🔴 [P1] must-fix (source of FAIL)
 1. **[file:line]** finding — risk — suggested fix
@@ -105,5 +109,7 @@ Save to `profile.gate.report_path` (a fresh `Write` of the report — the review
 Gate: PASS | FAIL
 Recommendation: <one concrete action> because <the single most important finding>
 ```
+
+If `harness_backend=repo-harness`, include the harness mirror/link path in the summary when created. The two-line `Gate:` tail remains exactly the same in both places.
 
 Iron rule: **any `[P1]` → `Gate: FAIL`; only `[P2]` / clean → `Gate: PASS`** (or `PASS (visual-only — box-model UNVERIFIED)` when `measure_capable` is false). PASS never means the page renders right — runtime verification is the executor's job.

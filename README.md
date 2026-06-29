@@ -40,6 +40,7 @@ The portable 80% in one breath:
 - [Quickstart](#quickstart)
 - [What's in the box](#whats-in-the-box)
 - [The profile — the 20%](#the-profile--the-20)
+- [Memory / Harness Interop](#memory--harness-interop)
 - [Capability ladder](#capability-ladder)
 - [Caveats that cap the gate](#caveats-that-cap-the-gate)
 - [How it stays portable *and* concrete](#how-it-stays-portable-and-concrete)
@@ -259,7 +260,7 @@ claude plugin install fe-fidelity-kit@fe-fidelity-kit
 
 Copy the kit as a single unit (cross-references between skills and rules are relative — a partial copy breaks them; `kit-manifest.json` rides along so `fidelity-adopt --verify` can self-check the copy):
 ```bash
-cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.claude/
+cp -R <kit-dir>/{skills,commands,rules,profile,references,kit-manifest.json} <project>/.claude/
 ```
 Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill and command is `fidelity-`-prefixed (`fidelity-adopt`, `fidelity-build-from-mockup`, `fidelity-page-handoff`, `fidelity-review`), so they won't shadow a project's own `code-review` / `build`.
 </details>
@@ -289,6 +290,7 @@ Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill 
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | Stack-neutral fidelity discipline (the five disaster zones, token-by-value, box-model measurement, AHA). |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | Stack-neutral executor×reviewer protocol (evidence contract, runtime≠static boundary, single-model fallback). |
 | [`profile/`](profile/) | The profile template + three filled examples (Next/AntD; Vite/Tailwind/Radix; Nuxt/Vue/Nuxt UI). |
+| [`references/memory-harness-interop.md`](references/memory-harness-interop.md) | Optional bridge for bounded memory reuse packets and repo-harness artifact mapping. |
 | [`kit-manifest.json`](kit-manifest.json) | Self-check manifest — `fidelity-adopt --verify` asserts the dirs exist and the cross-references resolve (catches a partial drop-in copy). |
 
 ---
@@ -299,13 +301,23 @@ Everything stack-specific lives in `.claude/fidelity-profile.md` (project-local,
 
 **Reference convention:** a *distinctive* leaf is written bare (`profile.token_sot`, `profile.ui_lib`, `profile.page_components_pattern`); a *generic* leaf keeps its section prefix (`profile.commands.lint`, `profile.verify.recipe.box`, `profile.mockup.styles`, `profile.gate.reviewer_host`).
 
-The profile carries: `stack` (framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n), `paths` (import alias, token source-of-truth, token accessor, placement dirs, AHA threshold), `mockup` (render + kind + styles + tokens + spec + dialect), `commands` (install/dev/lint/typecheck/test/build), `verify` (runtime tool, `measure_capable`, viewports, a per-stack measurement recipe), and `gate` (reviewer host, report path). Plus living markdown maps: **Component map** (source dialect → target native, grown on first use), **Icon map**, and **Token traps**.
+The profile carries: `stack` (framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n), `paths` (import alias, token source-of-truth, token accessor, placement dirs, AHA threshold), optional `context` (memory backend, harness backend, bounded reuse-packet policy), `mockup` (render + kind + styles + tokens + spec + dialect), `commands` (install/dev/lint/typecheck/test/build), `verify` (runtime tool, `measure_capable`, viewports, a per-stack measurement recipe), and `gate` (reviewer host, report path). Plus living markdown maps: **Component map** (source dialect → target native, grown on first use), **Icon map**, and **Token traps**.
 
 Three filled examples ship as the fill style and a genericity proof:
 
 - [`profile/examples/nexus-pro-fe.profile.md`](profile/examples/nexus-pro-fe.profile.md) — Next 16 + AntD v6 + emotion/antd-style + lucide-react.
 - [`profile/examples/react-tailwind-radix-vite.profile.md`](profile/examples/react-tailwind-radix-vite.profile.md) — Vite + React + Tailwind + Radix (proves the kit is not AntD-shaped; surfaces *same-dialect collapse* and *figma-inspect* edges).
 - [`profile/examples/nuxt-vue-nuxtui.profile.md`](profile/examples/nuxt-vue-nuxtui.profile.md) — Nuxt 3 + Vue + Nuxt UI (proves the kit is not *React*-shaped; surfaces the *cross-paradigm component map* and the *Iconify string-name* icon paradigm `i-lucide-*`).
+
+---
+
+## Memory / Harness Interop
+
+Memory and repo-harness support are optional. When `profile.context.memory_backend` is `claude-mem`, `codex-memory`, `repo-harness`, or `custom`, the skills can build a bounded **reuse packet**: 3-5 prior traps, prior `[P1]` failures, or evidence paths to re-check. The packet is advisory only; current render, code, profile, and runtime evidence always win.
+
+When `profile.context.harness_backend` is `repo-harness`, `/fidelity-review` can make its gate report discoverable from repo-local harness review/check/handoff artifacts if those paths already exist. It still keeps the canonical report at `profile.gate.report_path`, preserves the exact `Gate:` tail, and never makes repo-harness a dependency.
+
+No backend? The workflow is unchanged: `context.memory_backend: "none"` and `context.harness_backend: "none"` skip the bridge silently.
 
 ---
 
@@ -362,7 +374,7 @@ Issues and PRs welcome. The kit is intentionally small and opinionated. Notable 
 - Keep the rules **stack-neutral** — concrete names belong in `profile.<field>`, not in `rules/` or `skills/`.
 - Preserve the **sharp edges** (named traps, exact px, verbatim gotchas). Genericizing must not blunt them.
 - Keep the **path-invariant** layout (relative cross-references; no `${CLAUDE_PLUGIN_ROOT}` in shared files).
-- After editing structure, run `node scripts/verify-kit.mjs` — it self-checks the manifest dirs, the relative cross-references, the **profile field contract** (every `profile.*` the rules/skills cite is defined in the template), bilingual heading symmetry, that the examples carry no unfilled `FILL:`, and that every example defines every template field (the contract checked both ways). It is CI-friendly (non-zero exit on failure). *(A project that adopted the kit runs `fidelity-adopt --verify` instead — that one needs a filled profile; this one checks the kit repo itself.)*
+- After editing structure, run `node scripts/verify-kit.mjs` — it self-checks the manifest dirs, the relative cross-references, the **profile field contract** (every `profile.*` the rules/skills/commands/references cite is defined in the template), context backend enums, bilingual heading symmetry, that the examples carry no unfilled `FILL:`, and that every example defines every template field (the contract checked both ways). It is CI-friendly (non-zero exit on failure). *(A project that adopted the kit runs `fidelity-adopt --verify` instead — that one needs a filled profile; this one checks the kit repo itself.)*
 
 ---
 

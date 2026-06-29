@@ -28,6 +28,14 @@ paths:
   page_components_pattern: "app/<route>/_components/"
   promote_to_shared_after_uses: 2
 
+context:
+  memory_backend: "codex-memory"
+  memory_query: "search ~/.codex/memories/MEMORY.md for nexus-pro-fe, oa-mockup, route, ui_lib, Gate: FAIL, token trap, box-model; open only pointed rollout summaries"
+  harness_backend: "none"
+  harness_artifact_root: "(n/a)"
+  reuse_packet_limit: 5
+  privacy: "memory is advisory; repo/mockup/render wins; do not copy account, token, or unrelated chat content"
+
 mockup:
   render: "../oa-mockup/index.html (switch to the target view)"
   render_kind: "static-html"

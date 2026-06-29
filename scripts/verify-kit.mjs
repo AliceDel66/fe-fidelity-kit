@@ -13,9 +13,10 @@
 //   2. every components.* file in the manifest exists
 //   3. cross_refs resolve FROM their own location (drop-in safety)
 //   4. profile field contract: every `profile.<path>` referenced by
-//      rules/skills/commands is defined in the profile template
-//   5. README.md and README.zh.md are heading-symmetric (bilingual drift)
-//   6. shipped profile examples contain no unfilled `FILL:` placeholders
+//      rules/skills/commands/references is defined in the profile template
+//   5. profile context backend enums are valid in the template/examples
+//   6. README.md and README.zh.md are heading-symmetric (bilingual drift)
+//   7. shipped profile examples contain no unfilled `FILL:` placeholders
 
 import fs from "node:fs";
 import path from "node:path";
@@ -32,6 +33,11 @@ const bad = (m) => { checks++; fails++; console.log("  \x1b[31mFAIL\x1b[0m " + m
 const section = (m) => console.log("\n• " + m);
 
 const manifest = JSON.parse(read("kit-manifest.json"));
+const exDir = "profile/examples";
+const yamlScalar = (s, key) => {
+  const m = s.match(new RegExp(`^\\s*${key}:\\s*["']?([^"'#\\n]+)`, "m"));
+  return m ? m[1].trim() : undefined;
+};
 
 // 1. required dirs
 section("required dirs exist");
@@ -55,7 +61,7 @@ for (const { from, to } of manifest.cross_refs) {
 
 // gather methodology markdown (the files that cite profile.* at runtime)
 const mdFiles = [];
-for (const dir of ["rules", "skills", "commands"]) {
+for (const dir of ["rules", "skills", "commands", "references"]) {
   if (!exists(dir)) continue;
   const walk = (d) => {
     for (const e of fs.readdirSync(path.join(ROOT, d), { withFileTypes: true })) {
@@ -89,7 +95,30 @@ if (undefined_refs.length)
   for (const p of undefined_refs) bad(`profile.${p} referenced but not defined in template`);
 else ok(`${refs.size} referenced profile.* fields all defined in the template`);
 
-// 5. bilingual README heading symmetry
+// 5. context backend enums
+section("profile context backend enums");
+const allowedMemory = new Set(["none", "claude-mem", "codex-memory", "repo-harness", "custom"]);
+const allowedHarness = new Set(["none", "repo-harness"]);
+const profileDocs = [[manifest.components.profile_template, tpl]];
+if (exists(exDir))
+  for (const e of fs.readdirSync(path.join(ROOT, exDir)))
+    if (e.endsWith(".md")) profileDocs.push([path.join(exDir, e), read(path.join(exDir, e))]);
+for (const [rel, doc] of profileDocs) {
+  const memoryBackend = yamlScalar(doc, "memory_backend");
+  const harnessBackend = yamlScalar(doc, "harness_backend");
+  const reuseLimit = yamlScalar(doc, "reuse_packet_limit");
+  allowedMemory.has(memoryBackend)
+    ? ok(`${rel} memory_backend=${memoryBackend}`)
+    : bad(`${rel} has invalid memory_backend: ${memoryBackend || "(missing)"}`);
+  allowedHarness.has(harnessBackend)
+    ? ok(`${rel} harness_backend=${harnessBackend}`)
+    : bad(`${rel} has invalid harness_backend: ${harnessBackend || "(missing)"}`);
+  Number.isInteger(Number(reuseLimit)) && Number(reuseLimit) > 0
+    ? ok(`${rel} reuse_packet_limit=${reuseLimit}`)
+    : bad(`${rel} has invalid reuse_packet_limit: ${reuseLimit || "(missing)"}`);
+}
+
+// 6. bilingual README heading symmetry
 section("bilingual README symmetry");
 const headings = (s) => (s.match(/^#{1,4} /gm) || []).length;
 const en = headings(read("README.md"));
@@ -98,9 +127,8 @@ en === zh
   ? ok(`README.md and README.zh.md both have ${en} headings`)
   : bad(`heading drift: README.md=${en} vs README.zh.md=${zh}`);
 
-// 6. examples fully filled
+// 7. examples fully filled
 section("examples contain no unfilled FILL: placeholders");
-const exDir = "profile/examples";
 if (exists(exDir))
   for (const e of fs.readdirSync(path.join(ROOT, exDir))) {
     if (!e.endsWith(".md")) continue;

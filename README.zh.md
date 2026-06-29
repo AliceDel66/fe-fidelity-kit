@@ -40,6 +40,7 @@
 - [快速上手](#快速上手)
 - [包含哪些东西](#包含哪些东西)
 - [Profile —— 那 20%](#profile--那-20)
+- [Memory / Harness Interop](#memory--harness-interop)
 - [能力阶梯](#能力阶梯)
 - [会给 gate 设上限的两种情况](#会给-gate-设上限的两种情况)
 - [它如何同时做到可移植与具体](#它如何同时做到可移植与具体)
@@ -259,7 +260,7 @@ claude plugin install fe-fidelity-kit@fe-fidelity-kit
 
 把 kit 作为一个整体拷过去（skills 与 rules 之间的交叉引用是相对路径 —— 拷一半会断；`kit-manifest.json` 一并带上，`fidelity-adopt --verify` 才能自检这次拷贝）：
 ```bash
-cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.claude/
+cp -R <kit-dir>/{skills,commands,rules,profile,references,kit-manifest.json} <project>/.claude/
 ```
 此时 skills/commands 无命名空间：`/fidelity-review` 等。每个 kit skill 与 command 都带 `fidelity-` 前缀（`fidelity-adopt`、`fidelity-build-from-mockup`、`fidelity-page-handoff`、`fidelity-review`），不会盖住项目自己的 `code-review` / `build`。
 </details>
@@ -289,6 +290,7 @@ cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.cla
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | stack-neutral 的 fidelity 纪律（五个灾难区、token 按值、box-model 量化、AHA）。 |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | stack-neutral 的 executor×reviewer 协议（证据契约、runtime≠static 边界、single-model 兜底）。 |
 | [`profile/`](profile/) | profile 模板 + 三个填好的范例（Next/AntD；Vite/Tailwind/Radix；Nuxt/Vue/Nuxt UI）。 |
+| [`references/memory-harness-interop.md`](references/memory-harness-interop.md) | 可选桥接层：bounded memory reuse packet 与 repo-harness artifact 映射。 |
 | [`kit-manifest.json`](kit-manifest.json) | 自检清单 —— `fidelity-adopt --verify` 断言目录存在且交叉引用可解析（用于抓出拷一半的 drop-in）。 |
 
 ---
@@ -299,13 +301,23 @@ cp -R <kit-dir>/{skills,commands,rules,profile,kit-manifest.json} <project>/.cla
 
 **引用约定：** 一个*有辨识度*的叶子直接裸写（`profile.token_sot`、`profile.ui_lib`、`profile.page_components_pattern`）；一个*泛化*的叶子保留它的 section 前缀（`profile.commands.lint`、`profile.verify.recipe.box`、`profile.mockup.styles`、`profile.gate.reviewer_host`）。
 
-profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n）、`paths`（import alias、token source-of-truth、token 访问器、放置目录、AHA 阈值）、`mockup`（render + kind + styles + tokens + spec + dialect）、`commands`（install/dev/lint/typecheck/test/build）、`verify`（运行时工具、`measure_capable`、viewports、一份 per-stack 的测量 recipe）、以及 `gate`（reviewer host、报告路径）。外加几张会生长的 markdown 表：**Component map**（源 dialect → 目标 native，首次用到时生长）、**Icon map**、**Token traps**。
+profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n）、`paths`（import alias、token source-of-truth、token 访问器、放置目录、AHA 阈值）、可选 `context`（memory backend、harness backend、bounded reuse-packet 策略）、`mockup`（render + kind + styles + tokens + spec + dialect）、`commands`（install/dev/lint/typecheck/test/build）、`verify`（运行时工具、`measure_capable`、viewports、一份 per-stack 的测量 recipe）、以及 `gate`（reviewer host、报告路径）。外加几张会生长的 markdown 表：**Component map**（源 dialect → 目标 native，首次用到时生长）、**Icon map**、**Token traps**。
 
 随包附带三个填好的范例，既作填写示范也作可移植性证明：
 
 - [`profile/examples/nexus-pro-fe.profile.md`](profile/examples/nexus-pro-fe.profile.md) —— Next 16 + AntD v6 + emotion/antd-style + lucide-react。
 - [`profile/examples/react-tailwind-radix-vite.profile.md`](profile/examples/react-tailwind-radix-vite.profile.md) —— Vite + React + Tailwind + Radix（证明 kit 并非围着 AntD 设计；并暴露 *same-dialect collapse* 与 *figma-inspect* 两类边界）。
 - [`profile/examples/nuxt-vue-nuxtui.profile.md`](profile/examples/nuxt-vue-nuxtui.profile.md) —— Nuxt 3 + Vue + Nuxt UI（证明 kit 并非围着 *React* 设计；并暴露 *cross-paradigm 组件映射* 与 *Iconify 字符串名* 图标范式 `i-lucide-*`）。
+
+---
+
+## Memory / Harness Interop
+
+Memory 与 repo-harness 支持都是可选的。当 `profile.context.memory_backend` 是 `claude-mem`、`codex-memory`、`repo-harness` 或 `custom` 时，skills 可以生成一份 bounded **reuse packet**：最多 3-5 条历史陷阱、旧 `[P1]` 失败或需要复核的 evidence 路径。这份 packet 只做提示；当前 render、代码、profile 与 runtime evidence 永远优先。
+
+当 `profile.context.harness_backend` 是 `repo-harness` 时，`/fidelity-review` 可以在已有 repo-local harness review/check/handoff artifact 中暴露同一份 gate report。它仍以 `profile.gate.report_path` 为 canonical report，保留精确的 `Gate:` 结尾，并且不会把 repo-harness 变成硬依赖。
+
+没有 backend 时流程不变：`context.memory_backend: "none"` 与 `context.harness_backend: "none"` 会静默跳过桥接层。
 
 ---
 
@@ -362,7 +374,7 @@ profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib /
 - 保持 rules **stack-neutral** —— 具体名字属于 `profile.<field>`，不属于 `rules/` 或 `skills/`。
 - 保留那些**尖锐的坑**（具名陷阱、精确 px、逐字 gotcha）。泛化不得把它们磨钝。
 - 维持**路径不变**的布局（相对交叉引用；共享文件不用 `${CLAUDE_PLUGIN_ROOT}`）。
-- 改完结构后跑一次 `node scripts/verify-kit.mjs` —— 它会自检 manifest 目录、相对交叉引用、**profile 字段契约**（rules/skills 引用的每个 `profile.*` 都在模板里有定义）、双语标题对称性、示例里没有残留的 `FILL:`，以及每个示例都填齐模板的每个字段（字段契约双向校验）。它对 CI 友好（失败时返回非零退出码）。*（已采纳 kit 的项目改用 `fidelity-adopt --verify`——那个需要一份填好的 profile；这个校验的是 kit 仓库自身。）*
+- 改完结构后跑一次 `node scripts/verify-kit.mjs` —— 它会自检 manifest 目录、相对交叉引用、**profile 字段契约**（rules/skills/commands/references 引用的每个 `profile.*` 都在模板里有定义）、context backend 枚举、双语标题对称性、示例里没有残留的 `FILL:`，以及每个示例都填齐模板的每个字段（字段契约双向校验）。它对 CI 友好（失败时返回非零退出码）。*（已采纳 kit 的项目改用 `fidelity-adopt --verify`——那个需要一份填好的 profile；这个校验的是 kit 仓库自身。）*
 
 ---
 

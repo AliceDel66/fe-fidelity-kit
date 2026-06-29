@@ -91,3 +91,11 @@ The verdict vocabulary (`[P1]/[P2]` + `Gate:` + `Recommendation:`) is intentiona
 - When the **other** model is the executor, call this gate as the cross-model second opinion (read-only: `Read,Grep,Glob`).
 - When **you** are the executor and a **different** host should review, emit the reviewer prompt with `fidelity-page-handoff` (Template C — review handoff): it carries the diff locator, the evidence dir, the style-match checklist, and this verdict contract to the other host — the reviewer-side counterpart of handing off the build.
 - Present the other side's output **verbatim, unsoftened**; converge on `[P1]/[P2]` + the two-line tail.
+
+## 6. Optional memory / harness bridge
+
+If `profile.context.memory_backend` or `profile.context.harness_backend` is enabled, use `../references/memory-harness-interop.md` as the bridge contract:
+
+- memory produces only a bounded reuse packet (prior traps, prior `[P1]`, evidence to re-check); it never overrides the current render, profile, code, or runtime evidence;
+- repo-harness artifacts can make review reports/check evidence/handoff packets easier to find, but they do not change the gate verdict or make repo-harness a dependency;
+- when no backend exists, skip the bridge and keep using `.claude/review/` plus `profile.verify.evidence_dir`.

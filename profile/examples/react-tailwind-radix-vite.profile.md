@@ -27,6 +27,14 @@ paths:
   page_components_pattern: "src/routes/<route>/components/"
   promote_to_shared_after_uses: 2
 
+context:
+  memory_backend: "none"
+  memory_query: "(n/a)"
+  harness_backend: "none"
+  harness_artifact_root: "(n/a)"
+  reuse_packet_limit: 5
+  privacy: "memory is advisory; repo/mockup/render wins; never include secrets or private unrelated chat"
+
 mockup:
   render: "https://www.figma.com/file/<id>?node-id=<frame> (Dev Mode inspect)"
   render_kind: "figma-inspect"
