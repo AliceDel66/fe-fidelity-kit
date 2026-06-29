@@ -1,0 +1,6 @@
+# macOS
+.DS_Store
+
+# Local publishing / marketing artifacts (juejin covers, etc.) —
+# generated assets, not part of the kit. Kept locally, out of the repo.
+artifacts/
