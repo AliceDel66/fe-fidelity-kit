@@ -5,7 +5,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-06-30
+
+### Added
+- Builtin fidelity memory ledger: the default project-local `.claude/fidelity-memory.md` stores review-grade traps, `[P1]` history, evidence paths, mode, and signer metadata without requiring repo-harness or claude-mem.
+- `/goal`-ready development plan: `references/goal-mode-plan.md` captures the objective, P1/P2 slices, dogfood acceptance, verification commands, and stop conditions for the no-external-tools vNext workflow.
+- Optional `gate.reviewer_cmd` recipe in the profile template and examples, plus handoff guidance for using it as a read-only convenience with Template C fallback.
+
 ### Changed
+- Profile context defaults to `memory_backend: "builtin"` with `memory_path: ".claude/fidelity-memory.md"`.
+- `repo-harness` is removed from memory values and remains only an optional `harness_backend`.
+- Plan/build/handoff/review flows now read or append the builtin ledger first, then treat claude-mem, codex-memory, custom memory, and repo-harness as optional adapters.
+- README and README.zh now show builtin memory in both architecture and workflow diagrams, and make clear that repo-harness / claude-mem are not required for the normal kit workflow.
 - `react-tailwind-radix-vite` example — second Tailwind Zone-4 sharp edge in Project notes: the `border` utility is 1px and `border-transparent` is still a 1px border (not `border:none`), so a shared base class with per-variant border *color* silently adds ~2px box-model drift where the mockup is `border:none`. Surfaced by the **cross-model** dogfood (a Codex reviewer caught it as a `[P1]` the single-model pass had rated PASS).
 - README (both languages) — added a "proven on a real run" note to **The review gate**: the cross-model dogfood where a different-vendor reviewer (Codex) caught a `[P1]` box-model drift the single-model two-pass had rated PASS, then cleared the gate after the fix — turning the non-overlapping-blind-spots claim into a demonstrated result.
 

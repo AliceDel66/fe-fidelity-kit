@@ -11,7 +11,7 @@ A stack-neutral toolkit for [Claude Code](https://claude.com/claude-code) (and a
 ![type](https://img.shields.io/badge/type-Claude%20Code%20plugin-5b21b6)
 ![scope](https://img.shields.io/badge/scope-stack--neutral-0f766e)
 ![gate](https://img.shields.io/badge/review-cross--model%20gate-c2410c)
-![status](https://img.shields.io/badge/status-v0.3.0%20·%20early-1e40af)
+![status](https://img.shields.io/badge/status-v0.4.0%20·%20early-1e40af)
 
 </div>
 
@@ -38,6 +38,7 @@ The portable 80% in one breath:
 - [The review gate](#the-review-gate)
 - [The five disaster zones](#the-five-disaster-zones)
 - [Quickstart](#quickstart)
+- [Goal-mode plan](#goal-mode-plan)
 - [What's in the box](#whats-in-the-box)
 - [The profile — the 20%](#the-profile--the-20)
 - [Memory / Harness Interop](#memory--harness-interop)
@@ -68,6 +69,7 @@ flowchart TB
     classDef kit fill:#5b21b6,stroke:#ddd6fe,stroke-width:2px,color:#fff
     classDef profile fill:#c2410c,stroke:#fed7aa,stroke-width:2px,color:#fff
     classDef plan fill:#9d174d,stroke:#fbcfe8,stroke-width:2px,color:#fff
+    classDef memory fill:#374151,stroke:#d1d5db,stroke-width:2px,color:#fff
     classDef project fill:#1e40af,stroke:#bfdbfe,stroke-width:2px,color:#fff
 
     subgraph Src["Design source — visual truth"]
@@ -85,6 +87,7 @@ flowchart TB
 
     Prof[/".claude/fidelity-profile.md — bindings (the 20%)"/]:::profile
     Plan[/".claude/fidelity-plan.md — shared/local + build plan"/]:::plan
+    Memory[/".claude/fidelity-memory.md — review-grade reuse ledger"/]:::memory
 
     subgraph Tgt["Your project"]
         direction LR
@@ -95,8 +98,11 @@ flowchart TB
 
     KitBox -.->|"writes / reads"| Prof
     KitBox -.->|"writes / syncs"| Plan
+    KitBox -.->|"reads / appends"| Memory
+    Memory -.->|"reuse packet"| Plan
     Prof -.->|"profile.* → your stack"| Tgt
     Plan -.->|"placement + order"| Tgt
+    Memory -.->|"prior traps to re-check"| Tgt
     Src ==>|"reproduce 1:1"| Tgt
 
     style Src fill:none,stroke:#14b8a6,stroke-width:2px,stroke-dasharray:5 5,color:#5eead4
@@ -110,7 +116,7 @@ Because the methodology files never hardcode a stack — they cite `profile.<fie
 
 ## The workflow
 
-**Adopt once, plan the build once, then for each page: reproduce → verify → gate.** You can build a page yourself (the model is the executor) or hand it to a *different* host (e.g. Codex) and orchestrate.
+**Adopt once, plan the build once, then for each page: reproduce → verify → gate.** You can build a page yourself (the model is the executor) or hand it to a *different* host (e.g. Codex) and orchestrate. No repo-harness or claude-mem install is required: builtin memory is a project-local markdown ledger.
 
 ```mermaid
 flowchart TD
@@ -119,20 +125,25 @@ flowchart TD
     classDef build fill:#5b21b6,stroke:#ddd6fe,stroke-width:2px,color:#fff
     classDef verify fill:#1e40af,stroke:#bfdbfe,stroke-width:2px,color:#fff
     classDef gate fill:#0f766e,stroke:#99f6e4,stroke-width:2px,color:#fff
+    classDef memory fill:#374151,stroke:#d1d5db,stroke-width:2px,color:#fff
     classDef decision fill:#a16207,stroke:#fde68a,stroke-width:2px,color:#fff
     classDef success fill:#047857,stroke:#a7f3d0,stroke-width:2px,color:#fff
 
     Start((Start)):::adopt --> Adopt(["fidelity-adopt<br/>detect stack · write profile"]):::adopt
-    Adopt --> Plan(["fidelity-plan<br/>analyze · shared vs page-local · phased order"]):::plan
+    Adopt --> Memory(["builtin memory<br/>.claude/fidelity-memory.md<br/>fe-fidelity-kit only"]):::memory
+    Memory -. "reuse packet" .-> Plan(["fidelity-plan<br/>analyze · shared vs page-local · phased order"]):::plan
     Plan --> Choice{{"Who builds the page?"}}:::decision
     Choice -->|"you (this model)"| Build(["fidelity-build-from-mockup"]):::build
     Choice -->|"another host"| Handoff(["fidelity-page-handoff<br/>emit executor prompt"]):::build
+    Memory -. "reuse packet" .-> Build
+    Memory -. "reuse packet" .-> Handoff
     Handoff --> Build
     Build --> Checks(["done-definition:<br/>lint + typecheck + test"]):::verify
     Checks --> Runtime(["run the page · measure box-model<br/>drive states · console / network / responsive"]):::verify
     Runtime --> Loop(["Loop Engineering<br/>self-refactor → re-verify"]):::build
     Loop --> Review(["/fidelity-review<br/>cross-model review gate"]):::gate
     Review --> Verdict{{"any [P1]?"}}:::decision
+    Review -->|"append verdict · trap · evidence"| Memory
     Verdict -->|"no → Gate: PASS"| Sync(["sync fidelity-plan<br/>Part B (progress)"]):::plan
     Sync --> Done(["next page, or Done"]):::success
     Verdict -->|"yes → Gate: FAIL"| Build
@@ -140,13 +151,13 @@ flowchart TD
 
 | Phase | Skill / command | What happens |
 |---|---|---|
-| **Adopt** | `fidelity-adopt` | Detects your stack (framework, UI lib, styling, icons, token source, placement dirs, mockup location, runtime tool), asks only the gaps, writes `.claude/fidelity-profile.md` + an idempotent pointer in `CLAUDE.md`. Non-destructive, re-runnable. |
-| **Plan** | `fidelity-plan` | *(multi-page)* Surveys the whole mockup → design patterns, the **shared vs page-local** component inventory, and a phased build order → `.claude/fidelity-plan.md` with a living progress tracker. |
+| **Adopt** | `fidelity-adopt` | Detects your stack, asks only the gaps, writes `.claude/fidelity-profile.md` + builtin memory config (`memory_backend: builtin`, `memory_path: .claude/fidelity-memory.md`) + an idempotent pointer in `CLAUDE.md`. Non-destructive, re-runnable. |
+| **Plan** | `fidelity-plan` | *(multi-page)* Reads the builtin reuse packet, surveys the whole mockup → design patterns, the **shared vs page-local** component inventory, and a phased build order → `.claude/fidelity-plan.md` with a living progress tracker. |
 | **Reproduce (you)** | `fidelity-build-from-mockup` | You are the executor: pull the source, look at the render, map native components, walk the five disaster zones, place per AHA, then the done-definition. |
 | **Reproduce (hand off)** | `fidelity-page-handoff` | Emits a ready-to-paste prompt that hands the page to a different model/host as the executor — with the spec slice, done-definition, Loop Engineering, and gate handshake pre-filled. |
 | **Verify** | *(executor)* | `lint + typecheck + test` green, then **actually run the page**: load + screenshot, measure the box-model, drive interactive states, check console/network/responsive. Keep the evidence. |
 | **Loop Engineering** | *(executor)* | One self-refactor pass to the simplest shape — behavior and rendered result must not change — then re-run the entire done-definition. |
-| **Gate** | `/fidelity-review` *(or `fidelity-page-handoff` Template C → another host)* | A read-only reviewer (ideally a different model) audits the diff + evidence and emits `[P1]/[P2]` → `Gate: PASS | FAIL`. |
+| **Gate** | `/fidelity-review` *(or `fidelity-page-handoff` Template C → another host)* | A read-only reviewer audits diff + evidence, emits `[P1]/[P2]` → `Gate: PASS | FAIL`, and appends a review-grade memory record for future pages. |
 
 ---
 
@@ -269,14 +280,22 @@ Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill 
 
 ### 2 · Adopt, plan, reproduce, gate
 
+You do **not** need repo-harness or claude-mem. The default profile uses builtin memory at `.claude/fidelity-memory.md`; external tools only enhance discovery when you opt into them.
+
 ```text
 1. Run the  fidelity-adopt  skill in your project   → writes .claude/fidelity-profile.md
 2. Plan the build (multi-page mockup)               → the  fidelity-plan  skill → .claude/fidelity-plan.md
 3. Reproduce a page:
      • yourself          → the  fidelity-build-from-mockup  skill
      • via another host  → the  fidelity-page-handoff  skill (paste the prompt to Codex/etc.)
-4. Gate it:  /fidelity-review   → must be  Gate: PASS  (no [P1])  → then sync the plan
+4. Gate it:  /fidelity-review   → must be  Gate: PASS  (no [P1])  → appends .claude/fidelity-memory.md → then sync the plan
 ```
+
+---
+
+## Goal-mode plan
+
+Need to run this upgrade as a long-lived `/goal` task or hand it to another agent? Use [`references/goal-mode-plan.md`](references/goal-mode-plan.md) as the copy-paste objective. It contains the implementation boundary, P1/P2 slices, README sync requirements, dogfood acceptance, verification commands, and stop conditions for the no-external-tools vNext workflow.
 
 ---
 
@@ -292,7 +311,8 @@ Skills/commands are then unnamespaced: `/fidelity-review`, etc. Every kit skill 
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | Stack-neutral fidelity discipline (the five disaster zones, token-by-value, box-model measurement, AHA). |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | Stack-neutral executor×reviewer protocol (evidence contract, runtime≠static boundary, single-model fallback). |
 | [`profile/`](profile/) | The profile template + three filled examples (Next/AntD; Vite/Tailwind/Radix; Nuxt/Vue/Nuxt UI). |
-| [`references/memory-harness-interop.md`](references/memory-harness-interop.md) | Optional bridge for bounded memory reuse packets and repo-harness artifact mapping. |
+| [`references/memory-harness-interop.md`](references/memory-harness-interop.md) | Builtin markdown memory + bounded reuse packets, with optional memory/harness adapters. |
+| [`references/goal-mode-plan.md`](references/goal-mode-plan.md) | A complete `/goal`-ready development plan for the builtin-memory and reviewer-recipe upgrade. |
 | [`kit-manifest.json`](kit-manifest.json) | Self-check manifest — `fidelity-adopt --verify` asserts the dirs exist and the cross-references resolve (catches a partial drop-in copy). |
 
 ---
@@ -303,7 +323,7 @@ Everything stack-specific lives in `.claude/fidelity-profile.md` (project-local,
 
 **Reference convention:** a *distinctive* leaf is written bare (`profile.token_sot`, `profile.ui_lib`, `profile.page_components_pattern`); a *generic* leaf keeps its section prefix (`profile.commands.lint`, `profile.verify.recipe.box`, `profile.mockup.styles`, `profile.gate.reviewer_host`).
 
-The profile carries: `stack` (framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n), `paths` (import alias, token source-of-truth, token accessor, placement dirs, AHA threshold), optional `context` (memory backend, harness backend, bounded reuse-packet policy), `mockup` (render + kind + styles + tokens + spec + dialect), `commands` (install/dev/lint/typecheck/test/build), `verify` (runtime tool, `measure_capable`, viewports, a per-stack measurement recipe), and `gate` (reviewer host, report path). Plus living markdown maps: **Component map** (source dialect → target native, grown on first use), **Icon map**, and **Token traps**.
+The profile carries: `stack` (framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n), `paths` (import alias, token source-of-truth, token accessor, placement dirs, AHA threshold), `context` (`memory_backend`, `memory_path`, harness adapter, bounded reuse-packet policy), `mockup` (render + kind + styles + tokens + spec + dialect), `commands` (install/dev/lint/typecheck/test/build), `verify` (runtime tool, `measure_capable`, viewports, a per-stack measurement recipe), and `gate` (reviewer host, optional `reviewer_cmd`, report path). Plus living markdown maps: **Component map** (source dialect → target native, grown on first use), **Icon map**, and **Token traps**.
 
 Three filled examples ship as the fill style and a genericity proof:
 
@@ -315,11 +335,15 @@ Three filled examples ship as the fill style and a genericity proof:
 
 ## Memory / Harness Interop
 
-Memory and repo-harness support are optional. When `profile.context.memory_backend` is `claude-mem`, `codex-memory`, `repo-harness`, or `custom`, the skills can build a bounded **reuse packet**: 3-5 prior traps, prior `[P1]` failures, or evidence paths to re-check. The packet is advisory only; current render, code, profile, and runtime evidence always win.
+Builtin memory is the default. It reads and writes `.claude/fidelity-memory.md`, an append-only markdown ledger of prior traps, `[P1]` failures, evidence paths, and signer metadata. That is enough for the normal workflow; users do not need repo-harness or claude-mem.
+
+The skills turn that ledger into a bounded **reuse packet**: 3-5 prior traps, prior `[P1]` failures, or evidence paths to re-check. The packet is advisory only; current render, code, profile, and runtime evidence always win.
+
+`claude-mem`, `codex-memory`, and `custom` are optional memory adapters. They may contribute extra candidate facts, but the builtin ledger is still written so the project can downgrade without losing fidelity memory.
 
 When `profile.context.harness_backend` is `repo-harness`, `/fidelity-review` can make its gate report discoverable from repo-local harness review/check/handoff artifacts if those paths already exist. It still keeps the canonical report at `profile.gate.report_path`, preserves the exact `Gate:` tail, and never makes repo-harness a dependency.
 
-No backend? The workflow is unchanged: `context.memory_backend: "none"` and `context.harness_backend: "none"` skip the bridge silently.
+Want no memory at all? Set `context.memory_backend: "none"` explicitly.
 
 ---
 

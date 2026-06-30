@@ -31,9 +31,10 @@ paths:
   page_components_pattern: "FILL: e.g. app/<route>/_components/ | src/routes/<route>/components/"
   promote_to_shared_after_uses: 2          # AHA threshold: lift page-local → shared on the Nth use
 
-context:                      # optional memory/harness bridge; never a hard dependency
-  memory_backend: "none"      # none | claude-mem | codex-memory | repo-harness | custom
-  memory_query: "FILL: how to query reusable observations, e.g. search by project + route + ui_lib + Gate: FAIL + token trap | (n/a)"
+context:                      # built-in memory by default; external backends only enhance
+  memory_backend: "builtin"   # builtin | none | claude-mem | codex-memory | custom
+  memory_path: ".claude/fidelity-memory.md"
+  memory_query: "FILL: how to query external reusable observations, e.g. search by project + route + ui_lib + Gate: FAIL + token trap | (n/a)"
   harness_backend: "none"     # none | repo-harness
   harness_artifact_root: "FILL: e.g. .ai/harness | tasks | (n/a)"
   reuse_packet_limit: 5       # max advisory facts to carry into plan/build/handoff/review
@@ -78,6 +79,12 @@ verify:
 
 gate:
   reviewer_host: "FILL: who reviews, e.g. Claude /fidelity-review | repo-harness claude-review | same-model-two-pass"
+  reviewer_cmd:
+    label: "FILL: optional one-command read-only reviewer, e.g. Codex read-only review | (n/a)"
+    cmd: "FILL: e.g. codex exec --skip-git-repo-check --sandbox read-only <prompt> | (n/a)"
+    sandbox: "FILL: read-only | (n/a)"
+    expected_tail: ["Gate:", "Recommendation:"]
+    fallback: "Emit fidelity-page-handoff Template C prompt for manual paste"
   report_path: "FILL: e.g. .claude/review/report/<name>.md | stdout"
   p1_blocks: true
   p2_blocks_only_if_breaks_ui_goal: true

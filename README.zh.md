@@ -11,7 +11,7 @@
 ![type](https://img.shields.io/badge/type-Claude%20Code%20plugin-5b21b6)
 ![scope](https://img.shields.io/badge/scope-stack--neutral-0f766e)
 ![gate](https://img.shields.io/badge/review-cross--model%20gate-c2410c)
-![status](https://img.shields.io/badge/status-v0.3.0%20·%20early-1e40af)
+![status](https://img.shields.io/badge/status-v0.4.0%20·%20early-1e40af)
 
 </div>
 
@@ -38,6 +38,7 @@
 - [评审 gate](#评审-gate)
 - [五个灾难区](#五个灾难区)
 - [快速上手](#快速上手)
+- [Goal 模式计划](#goal-模式计划)
 - [包含哪些东西](#包含哪些东西)
 - [Profile —— 那 20%](#profile--那-20)
 - [Memory / Harness Interop](#memory--harness-interop)
@@ -68,6 +69,7 @@ flowchart TB
     classDef kit fill:#5b21b6,stroke:#ddd6fe,stroke-width:2px,color:#fff
     classDef profile fill:#c2410c,stroke:#fed7aa,stroke-width:2px,color:#fff
     classDef plan fill:#9d174d,stroke:#fbcfe8,stroke-width:2px,color:#fff
+    classDef memory fill:#374151,stroke:#d1d5db,stroke-width:2px,color:#fff
     classDef project fill:#1e40af,stroke:#bfdbfe,stroke-width:2px,color:#fff
 
     subgraph Src["Design source — visual truth"]
@@ -85,6 +87,7 @@ flowchart TB
 
     Prof[/".claude/fidelity-profile.md — bindings (the 20%)"/]:::profile
     Plan[/".claude/fidelity-plan.md — shared/local + build plan"/]:::plan
+    Memory[/".claude/fidelity-memory.md — review-grade reuse ledger"/]:::memory
 
     subgraph Tgt["Your project"]
         direction LR
@@ -95,8 +98,11 @@ flowchart TB
 
     KitBox -.->|"writes / reads"| Prof
     KitBox -.->|"writes / syncs"| Plan
+    KitBox -.->|"reads / appends"| Memory
+    Memory -.->|"reuse packet"| Plan
     Prof -.->|"profile.* → your stack"| Tgt
     Plan -.->|"placement + order"| Tgt
+    Memory -.->|"prior traps to re-check"| Tgt
     Src ==>|"reproduce 1:1"| Tgt
 
     style Src fill:none,stroke:#14b8a6,stroke-width:2px,stroke-dasharray:5 5,color:#5eead4
@@ -110,7 +116,7 @@ flowchart TB
 
 ## 工作流
 
-**adopt 一次、plan 一次，然后对每个页面：还原 → 验证 → gate。** 你可以自己构建页面（模型即 executor），也可以把它交给一个*不同的* host（例如 Codex）由你来编排。
+**adopt 一次、plan 一次，然后对每个页面：还原 → 验证 → gate。** 你可以自己构建页面（模型即 executor），也可以把它交给一个*不同的* host（例如 Codex）由你来编排。不需要安装 repo-harness 或 claude-mem：builtin memory 是项目本地 markdown ledger。
 
 ```mermaid
 flowchart TD
@@ -119,20 +125,25 @@ flowchart TD
     classDef build fill:#5b21b6,stroke:#ddd6fe,stroke-width:2px,color:#fff
     classDef verify fill:#1e40af,stroke:#bfdbfe,stroke-width:2px,color:#fff
     classDef gate fill:#0f766e,stroke:#99f6e4,stroke-width:2px,color:#fff
+    classDef memory fill:#374151,stroke:#d1d5db,stroke-width:2px,color:#fff
     classDef decision fill:#a16207,stroke:#fde68a,stroke-width:2px,color:#fff
     classDef success fill:#047857,stroke:#a7f3d0,stroke-width:2px,color:#fff
 
     Start((Start)):::adopt --> Adopt(["fidelity-adopt<br/>detect stack · write profile"]):::adopt
-    Adopt --> Plan(["fidelity-plan<br/>analyze · shared vs page-local · phased order"]):::plan
+    Adopt --> Memory(["builtin memory<br/>.claude/fidelity-memory.md<br/>fe-fidelity-kit only"]):::memory
+    Memory -. "reuse packet" .-> Plan(["fidelity-plan<br/>analyze · shared vs page-local · phased order"]):::plan
     Plan --> Choice{{"Who builds the page?"}}:::decision
     Choice -->|"you (this model)"| Build(["fidelity-build-from-mockup"]):::build
     Choice -->|"another host"| Handoff(["fidelity-page-handoff<br/>emit executor prompt"]):::build
+    Memory -. "reuse packet" .-> Build
+    Memory -. "reuse packet" .-> Handoff
     Handoff --> Build
     Build --> Checks(["done-definition:<br/>lint + typecheck + test"]):::verify
     Checks --> Runtime(["run the page · measure box-model<br/>drive states · console / network / responsive"]):::verify
     Runtime --> Loop(["Loop Engineering<br/>self-refactor → re-verify"]):::build
     Loop --> Review(["/fidelity-review<br/>cross-model review gate"]):::gate
     Review --> Verdict{{"any [P1]?"}}:::decision
+    Review -->|"append verdict · trap · evidence"| Memory
     Verdict -->|"no → Gate: PASS"| Sync(["sync fidelity-plan<br/>Part B (progress)"]):::plan
     Sync --> Done(["next page, or Done"]):::success
     Verdict -->|"yes → Gate: FAIL"| Build
@@ -140,13 +151,13 @@ flowchart TD
 
 | 阶段 | Skill / command | 发生了什么 |
 |---|---|---|
-| **Adopt** | `fidelity-adopt` | 探测你的技术栈（framework、UI lib、styling、icons、token 来源、放置目录、mockup 位置、运行时工具），只问缺口，写出 `.claude/fidelity-profile.md` + 在 `CLAUDE.md` 里写一个幂等指针。非破坏性、可重跑。 |
-| **Plan** | `fidelity-plan` | *(多页)* 普查整个 mockup → 设计模式、**shared vs page-local** 组件清单、分阶段构建顺序 → `.claude/fidelity-plan.md`，并带一个 living 进度追踪。 |
+| **Adopt** | `fidelity-adopt` | 探测你的技术栈，只问缺口，写出 `.claude/fidelity-profile.md` + builtin memory 配置（`memory_backend: builtin`、`memory_path: .claude/fidelity-memory.md`）+ 在 `CLAUDE.md` 里写一个幂等指针。非破坏性、可重跑。 |
+| **Plan** | `fidelity-plan` | *(多页)* 读取 reuse packet，普查整个 mockup → 设计模式、**shared vs page-local** 组件清单、分阶段构建顺序 → `.claude/fidelity-plan.md`，并带一个 living 进度追踪。 |
 | **还原（你来）** | `fidelity-build-from-mockup` | 你就是 executor：拉取源、看 render、映射 native 组件、走完五个灾难区、按 AHA 放置，然后跑 done-definition。 |
 | **还原（交出去）** | `fidelity-page-handoff` | 生成一段可直接粘贴的 prompt，把页面交给另一个 model/host 作为 executor —— 其中 spec 片段、done-definition、Loop Engineering 与 gate 握手都已预填。 |
 | **验证** | *(executor)* | `lint + typecheck + test` 全绿，然后**真的把页面跑起来**：load + 截图、量 box-model、驱动 interactive states、检查 console/network/responsive。保留证据。 |
 | **Loop Engineering** | *(executor)* | 一轮自重构，收敛到最简形态 —— 行为与渲染结果不得改变 —— 然后重跑整套 done-definition。 |
-| **Gate** | `/fidelity-review` *(或 `fidelity-page-handoff` 模板 C → 另一个 host)* | 一个只读的 reviewer（最好是不同模型）审查 diff + 证据，给出 `[P1]/[P2]` → `Gate: PASS | FAIL`。 |
+| **Gate** | `/fidelity-review` *(或 `fidelity-page-handoff` 模板 C → 另一个 host)* | 一个只读 reviewer 审查 diff + 证据，给出 `[P1]/[P2]` → `Gate: PASS | FAIL`，并追加一条 review-grade memory 记录供后续页面复用。 |
 
 ---
 
@@ -269,14 +280,22 @@ cp -R <kit-dir>/{skills,commands,rules,profile,references,kit-manifest.json} <pr
 
 ### 2 · Adopt、plan、还原、gate
 
+你不需要安装 repo-harness 或 claude-mem。默认 profile 会使用 `.claude/fidelity-memory.md` 作为 builtin memory；外部工具只在你显式启用时增强检索。
+
 ```text
 1. 在你的项目里运行  fidelity-adopt  skill   → 写出 .claude/fidelity-profile.md
 2. 规划构建（多页 mockup）                    → fidelity-plan  skill → .claude/fidelity-plan.md
 3. 还原一个页面：
      • 自己来          → fidelity-build-from-mockup  skill
      • 交给别的 host   → fidelity-page-handoff  skill（把 prompt 粘给 Codex 等）
-4. 把关：  /fidelity-review   → 必须是  Gate: PASS（无 [P1]）  → 然后同步计划
+4. 把关：  /fidelity-review   → 必须是  Gate: PASS（无 [P1]）  → 追加 .claude/fidelity-memory.md → 然后同步计划
 ```
+
+---
+
+## Goal 模式计划
+
+如果要把这次升级交给长跑 `/goal` 模式，直接使用 [`references/goal-mode-plan.md`](references/goal-mode-plan.md) 作为可复制的 objective。它包含实现边界、P1/P2 切片、README 同步要求、dogfood 验收、验证命令和 stop conditions，目标是让 vNext 默认不依赖外部 repo-harness 或 claude-mem。
 
 ---
 
@@ -292,7 +311,8 @@ cp -R <kit-dir>/{skills,commands,rules,profile,references,kit-manifest.json} <pr
 | [`rules/fidelity-visual.md`](rules/fidelity-visual.md) | stack-neutral 的 fidelity 纪律（五个灾难区、token 按值、box-model 量化、AHA）。 |
 | [`rules/fidelity-gate.md`](rules/fidelity-gate.md) | stack-neutral 的 executor×reviewer 协议（证据契约、runtime≠static 边界、single-model 兜底）。 |
 | [`profile/`](profile/) | profile 模板 + 三个填好的范例（Next/AntD；Vite/Tailwind/Radix；Nuxt/Vue/Nuxt UI）。 |
-| [`references/memory-harness-interop.md`](references/memory-harness-interop.md) | 可选桥接层：bounded memory reuse packet 与 repo-harness artifact 映射。 |
+| [`references/memory-harness-interop.md`](references/memory-harness-interop.md) | builtin markdown memory + bounded reuse packet，并可选桥接外部 memory/harness adapter。 |
+| [`references/goal-mode-plan.md`](references/goal-mode-plan.md) | 一份可直接交给 `/goal` 模式的完整开发计划，覆盖 builtin memory 与 reviewer recipe 升级。 |
 | [`kit-manifest.json`](kit-manifest.json) | 自检清单 —— `fidelity-adopt --verify` 断言目录存在且交叉引用可解析（用于抓出拷一半的 drop-in）。 |
 
 ---
@@ -303,7 +323,7 @@ cp -R <kit-dir>/{skills,commands,rules,profile,references,kit-manifest.json} <pr
 
 **引用约定：** 一个*有辨识度*的叶子直接裸写（`profile.token_sot`、`profile.ui_lib`、`profile.page_components_pattern`）；一个*泛化*的叶子保留它的 section 前缀（`profile.commands.lint`、`profile.verify.recipe.box`、`profile.mockup.styles`、`profile.gate.reviewer_host`）。
 
-profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n）、`paths`（import alias、token source-of-truth、token 访问器、放置目录、AHA 阈值）、可选 `context`（memory backend、harness backend、bounded reuse-packet 策略）、`mockup`（render + kind + styles + tokens + spec + dialect）、`commands`（install/dev/lint/typecheck/test/build）、`verify`（运行时工具、`measure_capable`、viewports、一份 per-stack 的测量 recipe）、以及 `gate`（reviewer host、报告路径）。外加几张会生长的 markdown 表：**Component map**（源 dialect → 目标 native，首次用到时生长）、**Icon map**、**Token traps**。
+profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib / copy_language / i18n）、`paths`（import alias、token source-of-truth、token 访问器、放置目录、AHA 阈值）、`context`（`memory_backend`、`memory_path`、harness adapter、bounded reuse-packet 策略）、`mockup`（render + kind + styles + tokens + spec + dialect）、`commands`（install/dev/lint/typecheck/test/build）、`verify`（运行时工具、`measure_capable`、viewports、一份 per-stack 的测量 recipe）、以及 `gate`（reviewer host、可选 `reviewer_cmd`、报告路径）。外加几张会生长的 markdown 表：**Component map**（源 dialect → 目标 native，首次用到时生长）、**Icon map**、**Token traps**。
 
 随包附带三个填好的范例，既作填写示范也作可移植性证明：
 
@@ -315,11 +335,15 @@ profile 携带：`stack`（framework / ui_lib / styling / icon_lib / chart_lib /
 
 ## Memory / Harness Interop
 
-Memory 与 repo-harness 支持都是可选的。当 `profile.context.memory_backend` 是 `claude-mem`、`codex-memory`、`repo-harness` 或 `custom` 时，skills 可以生成一份 bounded **reuse packet**：最多 3-5 条历史陷阱、旧 `[P1]` 失败或需要复核的 evidence 路径。这份 packet 只做提示；当前 render、代码、profile 与 runtime evidence 永远优先。
+Builtin memory 是默认能力。它会读写 `.claude/fidelity-memory.md`，这是一份 append-only markdown ledger，记录历史陷阱、旧 `[P1]`、evidence 路径和 signer 信息。正常流程只靠它就够用；用户不需要安装 repo-harness 或 claude-mem。
+
+skills 会把这份 ledger 转成 bounded **reuse packet**：最多 3-5 条历史陷阱、旧 `[P1]` 失败或需要复核的 evidence 路径。这份 packet 只做提示；当前 render、代码、profile 与 runtime evidence 永远优先。
+
+`claude-mem`、`codex-memory` 和 `custom` 是可选 memory adapter。它们可以提供额外候选事实，但 builtin ledger 仍会写入，所以项目降级后也不会丢 fidelity memory。
 
 当 `profile.context.harness_backend` 是 `repo-harness` 时，`/fidelity-review` 可以在已有 repo-local harness review/check/handoff artifact 中暴露同一份 gate report。它仍以 `profile.gate.report_path` 为 canonical report，保留精确的 `Gate:` 结尾，并且不会把 repo-harness 变成硬依赖。
 
-没有 backend 时流程不变：`context.memory_backend: "none"` 与 `context.harness_backend: "none"` 会静默跳过桥接层。
+真的不想要 memory？显式设置 `context.memory_backend: "none"`。
 
 ---
 

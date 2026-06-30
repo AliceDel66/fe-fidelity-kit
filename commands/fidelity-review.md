@@ -12,7 +12,7 @@ You are the **Reviewer** for this change, not the executor. Audit the code chang
 
 - Read `./.claude/fidelity-profile.md` (project root). **Missing → tell the user to run `fidelity-adopt`** and stop. All stack-specific checks below resolve against `profile.*`.
 - Read `../rules/fidelity-gate.md` (relative to this command file) for roles + verdict rules, and `../rules/fidelity-visual.md` for the UI style-match signals.
-- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../references/memory-harness-interop.md`; use it only to build an advisory reuse packet and map evidence into repo-local artifacts.
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../references/memory-harness-interop.md`; use it only to build an advisory reuse packet, append the builtin ledger, and map evidence into repo-local artifacts.
 
 ### Roles & verdict (per `fidelity-gate.md`)
 
@@ -87,7 +87,7 @@ On a new dependency (package.json / import): necessity (can an existing dep do i
 
 ### Step 3 — report + gate
 
-Save to `profile.gate.report_path` (a fresh `Write` of the report — the reviewer's only write; never edit source) and return the same conclusion to the user. Format:
+Save to `profile.gate.report_path` (a fresh `Write` of the report; never edit source) and return the same conclusion to the user. Format:
 
 ```markdown
 ## Code Review report
@@ -113,3 +113,12 @@ Recommendation: <one concrete action> because <the single most important finding
 If `harness_backend=repo-harness`, include the harness mirror/link path in the summary when created. The two-line `Gate:` tail remains exactly the same in both places.
 
 Iron rule: **any `[P1]` → `Gate: FAIL`; only `[P2]` / clean → `Gate: PASS`** (or `PASS (visual-only — box-model UNVERIFIED)` when `measure_capable` is false). PASS never means the page renders right — runtime verification is the executor's job.
+
+### Step 4 — append builtin memory
+
+If `profile.context.memory_backend != "none"`, append one record to `profile.context.memory_path` (create it with the advisory header if missing) using `memory-harness-interop.md`'s builtin ledger format.
+
+- Write only review-grade facts: route/page, verdict, mode, traps / `[P1]`, evidence paths, short note, and `signed · <reviewer host/model/person> · <date>`.
+- Never write raw chat, tokens, account data, private unrelated context, or long transcripts.
+- If the executor evidence is missing or the report tail is not exactly `Gate:` + `Recommendation:`, do not write a clean PASS record; write degraded/blocked or skip with a reason.
+- External memory backends still write this builtin ledger so the project can downgrade without losing fidelity memory.

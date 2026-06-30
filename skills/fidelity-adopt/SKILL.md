@@ -32,11 +32,12 @@ Probe the project and record findings; do NOT guess past the evidence.
 - **Placement**: `app/` present (App Router) → `app/<route>/_components/` + `components/`; else `src/components/` + `src/routes/<route>/components/` (adjust to what actually exists).
 - **Mockup source**: sibling dirs matching `../*mockup*` / `../*-design*`; any `spec.md` + `design-system.md` pair; a single self-contained design-to-code export (one inline-styled `.html`, often v0 / Figma Make / a "dc" export, may carry `<sc-if>`/`<sc-for>`/`{{ }}` placeholders) → point `mockup.styles`/`mockup.token_source`/`mockup.spec` at that same file; a Storybook config; a Figma link in README/docs; git submodules.
 - **Runtime tool**: is a gstack `browse` skill available? `@playwright/test` / a Playwright MCP in deps? any configured browser MCP? → also decide `measure_capable` (can it return `getComputedStyle`/`getBoundingClientRect`? screenshot-only or Figma-only → false) **and `state_drivable`** (can it fire + capture `:hover`/`:focus`/`:active`/open? a measure-only preview that can't drive states → false — the two are orthogonal).
-- **Context backends (optional; never blocking)**:
-  - `memory_backend` ← `claude-mem` if an installed claude-mem MCP/CLI is visible; `codex-memory` if `$HOME/.codex/memories/MEMORY.md` exists and is relevant; `repo-harness` if repo-local harness artifacts are the only memory surface; `custom` only when the user provides a query path; otherwise `none`.
-  - `harness_backend` ← `repo-harness` only when `.ai/harness/`, repo-harness task/check/review artifacts, or an explicit repo-harness config exists; otherwise `none`.
+- **Context backends (builtin by default; external adapters never block)**:
+  - `memory_backend` ← `builtin` by default. Use `claude-mem`, `codex-memory`, or `custom` only when the user explicitly wants that external memory adapter; still keep `memory_path` for the builtin ledger. Use `none` only when the user explicitly opts out of fidelity memory.
+  - `memory_path` ← `.claude/fidelity-memory.md` unless the user asks for a project-local private path.
+  - `harness_backend` ← `repo-harness` only when `.ai/harness/`, repo-harness task/check/review artifacts, or an explicit repo-harness config exists; otherwise `none`. Repo-harness is never a memory backend.
   - `harness_artifact_root` ← the detected repo-local root (e.g. `.ai/harness` or `tasks`) or `(n/a)`.
-  - `memory_query` ← a concise query recipe using project name + mockup + route + ui_lib + `Gate: FAIL` + `token trap` + `box-model`; do not bake in user-private content.
+  - `memory_query` ← a concise external-adapter query recipe using project name + mockup + route + ui_lib + `Gate: FAIL` + `token trap` + `box-model`; for builtin-only projects use `(n/a)`. Do not bake in user-private content.
 
 > Use the available read tools (`package.json`, `tsconfig.json`, lockfile, dir listing). On a CodeGraph-indexed repo, a single `codegraph_explore "theme tokens token source"` can locate the token SoT fast.
 
@@ -49,7 +50,7 @@ Confirm the detected summary, then ask only what detection couldn't settle:
 - **Runtime tool** + **is it measure_capable?** + **is it state_drivable?** (these two orthogonal axes gate how strong the gate can be — see `fidelity-gate.md`).
 - **copy_language** + `i18n`.
 - Confirm placement pattern + AHA threshold (default 2).
-- **Context backend** only if ambiguous: choose `memory_backend` / `harness_backend`, or confirm `none`. Missing backends are fine; never require installation during adopt.
+- **Context backend** only if ambiguous: confirm whether the user wants the default builtin ledger, an external memory adapter, or explicit `none`. Missing repo-harness / claude-mem is fine; never require installation during adopt.
 
 Prefer the `AskUserQuestion` tool for these so the user picks from detected options.
 
@@ -59,7 +60,7 @@ Prefer the `AskUserQuestion` tool for these so the user picks from detected opti
   - **If it already exists: do NOT overwrite.** Write `./.claude/fidelity-profile.review.md` instead, show the diff, and ask the user to merge. (Refresh mode = re-detect → diff → user merges.)
   - Seed `## Component map` with a few known rows for the detected `(dialect → ui_lib)` pair (or leave the same-dialect note if they match); seed `## Icon map` with the algorithmic rule (or a stub if the sets differ). Mark both "extend on first use." **Never fabricate an exhaustive table.**
   - Any field detection couldn't resolve → write `TODO(adopt: <hint>)`, never a guess. The other skills treat a `TODO(` field as "ask the user at point of use," so adopt never blocks downstream work.
-  - Fill `context.*` with detected optional backends. If none are present, write `memory_backend: "none"` and `harness_backend: "none"`; this preserves the old workflow exactly. If a backend is present but query details are unclear, write `TODO(adopt: context query)` rather than guessing.
+  - Fill `context.*` with the builtin default plus detected optional adapters. If no external tools are present, write `memory_backend: "builtin"`, `memory_path: ".claude/fidelity-memory.md"`, and `harness_backend: "none"`. If an external memory adapter is present but query details are unclear, write `TODO(adopt: context query)` rather than guessing. Use `memory_backend: "none"` only for explicit opt-out.
   - Stamp `generated_by: fidelity-adopt@<kit version from kit-manifest.json>` and `generated_against` (ui_lib + framework majors).
 - **CLAUDE.md (or AGENTS.md) pointer** — append an **idempotent** block inside markers; re-running replaces only the marked block:
   ```
@@ -77,7 +78,8 @@ Prefer the `AskUserQuestion` tool for these so the user picks from detected opti
 
 After writing (or when invoked as `fidelity-adopt --verify`), assert:
 - `./.claude/fidelity-profile.md` exists and every `FILL:` is replaced (remaining `TODO(adopt:…)` are listed, not errors).
-- `context.memory_backend` is one of `none | claude-mem | codex-memory | repo-harness | custom`; `context.harness_backend` is one of `none | repo-harness`; backend absence is informational, not an error.
+- `context.memory_backend` is one of `builtin | none | claude-mem | codex-memory | custom`; `context.memory_path` is set.
+- `context.harness_backend` is one of `none | repo-harness`; external backend absence is informational, not an error.
 - The kit's cross-references (the `cross_refs` list in `kit-manifest.json` is the SoT — don't hardcode a count) resolve **from their own locations**: `skills/*/SKILL.md → ../../rules/*.md` (and adopt → `../../profile/…`), `commands/fidelity-review.md → ../rules/*.md` (guards against a partial drop-in copy that omitted `rules/` or `profile/`). If the kit is installed as a plugin, this check is informational; in drop-in mode it catches a broken copy.
 - `measure_capable: false` → print a loud note: the gate is capped to `PASS (visual-only — box-model UNVERIFIED)`; suggest installing a measurement-capable browser (a headless-browse skill / Playwright).
 - `state_drivable: false` → print a loud note: Zone-5 interactive states can't be driven, so the gate carries `interaction UNDRIVEN` (states confirmed from the source's rules + code only, no driven screenshot); suggest a state-driving tool where hover/focus fidelity matters.
@@ -88,7 +90,7 @@ After writing (or when invoked as `fidelity-adopt --verify`), assert:
 
 ## Checklist
 - [ ] Detected stack from package.json / lockfile / tsconfig / token candidates / placement / mockup / runtime tool
-- [ ] Detected optional context backends (`memory_backend`, `harness_backend`) or explicitly set them to `none`
+- [ ] Set builtin fidelity memory (`memory_backend`, `memory_path`) and detected optional `harness_backend`, or recorded explicit memory opt-out
 - [ ] Asked only the gaps (batched), preferring AskUserQuestion
 - [ ] Wrote `.claude/fidelity-profile.md` (or `.review.md` if one existed), `TODO(adopt:…)` for unknowns, seeded maps non-exhaustively
 - [ ] Idempotent CLAUDE.md marker block added

@@ -1,6 +1,6 @@
 {
   "kit": "fe-fidelity-kit",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "purpose": "Self-check manifest. fidelity-adopt --verify asserts these dirs exist and the cross-references resolve from their own locations (catches a partial drop-in copy that omitted rules/).",
   "requires_dirs": [
     "skills",
@@ -25,7 +25,8 @@
     ],
     "profile_template": "profile/fidelity-profile.template.md",
     "references": [
-      "references/memory-harness-interop.md"
+      "references/memory-harness-interop.md",
+      "references/goal-mode-plan.md"
     ]
   },
   "cross_refs": [

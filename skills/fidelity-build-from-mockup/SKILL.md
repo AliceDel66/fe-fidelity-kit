@@ -14,7 +14,7 @@ description: Reproduce a design mockup (a render + design tokens + optional spec
 - **Read `./.claude/fidelity-profile.md`** (relative to the project root). **Missing → STOP and run `fidelity-adopt`** — do not guess the stack. Every `profile.X` below comes from there.
 - **Read `./.claude/fidelity-plan.md` if it exists** — its §A3 tells you this page's planned components and their **shared vs page-local** placement (from the up-front survey), and §A5 the build order. Absent + the mockup is multi-page → suggest running `fidelity-plan` first. You will also **sync its Part B** after the gate (§7).
 - **Read `../../rules/fidelity-visual.md`** and **`../../rules/fidelity-gate.md`** (relative to this skill file). They are the methodology SoT; this skill is the procedure.
-- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and prepare a bounded reuse packet for this page.
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and prepare a bounded reuse packet for this page from the builtin ledger plus any optional adapter.
 - If any `profile` field you need is `TODO(adopt:…)`, ask the user for it now rather than guessing.
 
 ## 1. Pull the source + look at the render (not just the text)
@@ -26,14 +26,14 @@ description: Reproduce a design mockup (a render + design tokens + optional spec
 
 ### Optional reuse packet (advisory)
 
-If context backends are enabled, query by project + target page/route + `profile.ui_lib` + `profile.icon_lib` + `Gate: FAIL` + `token trap` + `box-model`. Extract at most `profile.context.reuse_packet_limit` facts:
+If context backends are enabled, read `profile.context.memory_path` first (works without repo-harness or claude-mem), then query any optional external adapter by project + target page/route + `profile.ui_lib` + `profile.icon_lib` + `Gate: FAIL` + `token trap` + `box-model`. Extract at most `profile.context.reuse_packet_limit` facts:
 
 - prior `[P1]` fidelity failures to avoid;
 - token/radius/color traps to re-check by value;
 - box-model or DOM-structure traps to measure now;
 - evidence paths that should exist or be regenerated.
 
-Write the packet into your working notes or handoff notes. It is not authority: current render + source CSS + profile + runtime evidence win.
+Prefer cross-model FAIL/[P1] records over single-model PASS records. Write the packet into your working notes or handoff notes. It is not authority: current render + source CSS + profile + runtime evidence win.
 
 ## 2. Map components — native-first + discover-and-extend
 

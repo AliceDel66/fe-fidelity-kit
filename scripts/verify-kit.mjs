@@ -14,7 +14,7 @@
 //   3. cross_refs resolve FROM their own location (drop-in safety)
 //   4. profile field contract: every `profile.<path>` referenced by
 //      rules/skills/commands/references is defined in the profile template
-//   5. profile context backend enums are valid in the template/examples
+//   5. profile context backend enums and builtin memory path are valid in the template/examples
 //   6. README.md and README.zh.md are heading-symmetric (bilingual drift)
 //   7. shipped profile examples contain no unfilled `FILL:` placeholders
 
@@ -97,7 +97,7 @@ else ok(`${refs.size} referenced profile.* fields all defined in the template`);
 
 // 5. context backend enums
 section("profile context backend enums");
-const allowedMemory = new Set(["none", "claude-mem", "codex-memory", "repo-harness", "custom"]);
+const allowedMemory = new Set(["builtin", "none", "claude-mem", "codex-memory", "custom"]);
 const allowedHarness = new Set(["none", "repo-harness"]);
 const profileDocs = [[manifest.components.profile_template, tpl]];
 if (exists(exDir))
@@ -105,6 +105,7 @@ if (exists(exDir))
     if (e.endsWith(".md")) profileDocs.push([path.join(exDir, e), read(path.join(exDir, e))]);
 for (const [rel, doc] of profileDocs) {
   const memoryBackend = yamlScalar(doc, "memory_backend");
+  const memoryPath = yamlScalar(doc, "memory_path");
   const harnessBackend = yamlScalar(doc, "harness_backend");
   const reuseLimit = yamlScalar(doc, "reuse_packet_limit");
   allowedMemory.has(memoryBackend)
@@ -113,6 +114,9 @@ for (const [rel, doc] of profileDocs) {
   allowedHarness.has(harnessBackend)
     ? ok(`${rel} harness_backend=${harnessBackend}`)
     : bad(`${rel} has invalid harness_backend: ${harnessBackend || "(missing)"}`);
+  memoryPath && memoryPath.includes("fidelity-memory.md")
+    ? ok(`${rel} memory_path=${memoryPath}`)
+    : bad(`${rel} has invalid memory_path: ${memoryPath || "(missing)"}`);
   Number.isInteger(Number(reuseLimit)) && Number(reuseLimit) > 0
     ? ok(`${rel} reuse_packet_limit=${reuseLimit}`)
     : bad(`${rel} has invalid reuse_packet_limit: ${reuseLimit || "(missing)"}`);

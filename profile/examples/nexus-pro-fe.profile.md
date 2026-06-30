@@ -29,8 +29,9 @@ paths:
   promote_to_shared_after_uses: 2
 
 context:
-  memory_backend: "codex-memory"
-  memory_query: "search ~/.codex/memories/MEMORY.md for nexus-pro-fe, oa-mockup, route, ui_lib, Gate: FAIL, token trap, box-model; open only pointed rollout summaries"
+  memory_backend: "builtin"
+  memory_path: ".claude/fidelity-memory.md"
+  memory_query: "optional external lookup: search ~/.codex/memories/MEMORY.md for nexus-pro-fe, oa-mockup, route, ui_lib, Gate: FAIL, token trap, box-model; open only pointed rollout summaries"
   harness_backend: "none"
   harness_artifact_root: "(n/a)"
   reuse_packet_limit: 5
@@ -72,6 +73,12 @@ verify:
 
 gate:
   reviewer_host: "Claude /code-review (project) or fe-fidelity-kit /fidelity-review; cross-model via repo-harness claude-review"
+  reviewer_cmd:
+    label: "Codex read-only review"
+    cmd: "codex exec --skip-git-repo-check --sandbox read-only <prompt>"
+    sandbox: "read-only"
+    expected_tail: ["Gate:", "Recommendation:"]
+    fallback: "Emit fidelity-page-handoff Template C prompt for manual paste"
   report_path: ".claude/review/report/<YYYY-MM-DD-kebab>.md"
   p1_blocks: true
   p2_blocks_only_if_breaks_ui_goal: true

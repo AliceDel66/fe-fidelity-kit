@@ -31,7 +31,8 @@ paths:
   promote_to_shared_after_uses: 2
 
 context:
-  memory_backend: "none"
+  memory_backend: "builtin"
+  memory_path: ".claude/fidelity-memory.md"
   memory_query: "(n/a)"
   harness_backend: "none"
   harness_artifact_root: "(n/a)"
@@ -75,6 +76,12 @@ verify:
 
 gate:
   reviewer_host: "Claude /fidelity-review; cross-model via codex-review; or same-model two-pass if no second host"
+  reviewer_cmd:
+    label: "Codex read-only review"
+    cmd: "codex exec --skip-git-repo-check --sandbox read-only <prompt>"
+    sandbox: "read-only"
+    expected_tail: ["Gate:", "Recommendation:"]
+    fallback: "Emit fidelity-page-handoff Template C prompt for manual paste"
   report_path: ".claude/review/report/<name>.md"
   p1_blocks: true
   p2_blocks_only_if_breaks_ui_goal: true

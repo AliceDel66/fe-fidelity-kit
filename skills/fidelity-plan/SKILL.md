@@ -15,16 +15,18 @@ description: Analyze the WHOLE mockup up-front (before building any page) — re
 
 - **Read `./.claude/fidelity-profile.md`.** Missing → STOP and run `fidelity-adopt` first. Every `profile.X` below comes from there.
 - **Read `../../rules/fidelity-visual.md`** (§3 native-first, §4 AHA placement) and **`../../rules/fidelity-gate.md`** (the verdict vocab Part B logs). These are the SoT; this skill is the procedure.
-- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and follow its bounded reuse-packet rules.
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and follow its builtin ledger + bounded reuse-packet rules.
 - This is a survey, not a build: do not write code, do not edit source. The only write is `.claude/fidelity-plan.md`.
 
 ## 1. Memory / harness preflight (advisory)
 
-Do this before the mockup survey only when a context backend is configured:
+Do this before the mockup survey when `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`:
 
-- Query by the current project, `profile.mockup.render`, `profile.mockup.spec`, `profile.ui_lib`, `profile.icon_lib`, and likely route/page names.
+- Read the builtin ledger at `profile.context.memory_path` first when it exists. It works without repo-harness or claude-mem.
+- Query any configured external memory adapter by the current project, `profile.mockup.render`, `profile.mockup.spec`, `profile.ui_lib`, `profile.icon_lib`, and likely route/page names.
 - Look specifically for old `Gate: FAIL`, `[P1]`, `token trap`, `box-model`, icon/font/state drift, stale plan rows, and missing evidence.
 - Extract at most `profile.context.reuse_packet_limit` facts using the reuse packet format from `memory-harness-interop.md`.
+- Weight `cross-model FAIL` / `cross-model [P1]` highest. Treat `single-model PASS` as weak advisory and re-check it against the current render.
 - Treat the packet as stale until the current render, profile, and repo confirm it. Never let memory override visual truth.
 - If nothing relevant is found, record `Reuse packet: none`.
 
@@ -92,7 +94,11 @@ Write the skeleton below, filled from §1–§6. **If it already exists: do NOT 
 - Out of scope: <...>
 
 ### A1.5 Reuse packet (advisory; verify against current render)
-- <3-5 prior facts from profile.context memory/harness backends, or `Reuse packet: none`>
+- Source: <profile.context.memory_path or external adapter/harness artifact> · Date: <if known> · Mode: <cross-model|single-model-two-pass|manual|unknown>
+- Known trap: <token/icon/font/box-model/state issue> · Current check: <what to verify now>
+- Prior gate failure: <[P1] summary> · Avoid by: <specific action>
+- Evidence to re-check: <screenshot/box/console/network path or expected artifact>
+<!-- Or: Reuse packet: none -->
 
 ### A2. Design patterns
 - Shells/frames: <...> · Recurring blocks: <...> · Recurring interactions: <...>

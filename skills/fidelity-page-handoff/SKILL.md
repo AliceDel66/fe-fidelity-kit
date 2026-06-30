@@ -16,16 +16,17 @@ description: Produce a ready-to-paste prompt that hands a 1:1 mockup-reproductio
 - Read `./.claude/fidelity-profile.md` (project root). Missing → tell the user to run `fidelity-adopt` first.
 - Read `./.claude/fidelity-plan.md` if it exists — pull this page's planned components from §A3 (which are **shared** vs **page-local**) and inline them into the prompt below. The external executor can't see the plan file, so you carry the slice in. You (orchestrator) own the plan and **sync its Part B** after the handoff returns (see Wrap-up).
 - Read `../../rules/fidelity-gate.md` for the gate vocabulary the prompt must hand-shake with. (You don't need to re-read `fidelity-visual.md` — the prompt points the other host at it.)
-- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and carry a bounded reuse packet into the emitted prompt.
+- If `profile.context.memory_backend != "none"` or `profile.context.harness_backend != "none"`, read `../../references/memory-harness-interop.md` and carry a bounded reuse packet into the emitted prompt. Read `profile.context.memory_path` first; external tools are not required.
 - You may read `profile.mockup.spec` **only** to resolve the right spec section. Do not pull, build, or edit anything.
 
 ## What you do (produce a prompt; don't build)
 
 1. **Pick the mode**: brand-new page → Template A; fix an existing page → Template B; **have a different host review a built page → Template C**. If unclear which page, ask first.
 2. **Resolve the spec section**: read the heading index of `profile.mockup.spec`, map the user's page to its section, fill `<spec-section>`. If you can't map it, keep a placeholder and ask the user to confirm.
-3. **Resolve the reuse packet**: if context backends are enabled, query by project + page/route + `profile.ui_lib` + `profile.icon_lib` + `Gate: FAIL` + `token trap` + `box-model`; include 3-5 advisory facts max. If none, write `Reuse packet: none`.
-4. **Fill from profile**: substitute every `{{profile.*}}` placeholder below with the real value from `./.claude/fidelity-profile.md`. Fill `<page-name>` / `<route>` from the user.
-5. **Output**: put the filled prompt in a single fenced code block, verbatim, nothing extra around it.
+3. **Resolve the reuse packet**: if context backends are enabled, read builtin memory first, then query optional external adapters by project + page/route + `profile.ui_lib` + `profile.icon_lib` + `Gate: FAIL` + `token trap` + `box-model`; include 3-5 advisory facts max. If none, write `Reuse packet: none`.
+4. **Resolve reviewer recipe**: if `profile.gate.reviewer_cmd` is filled and not `(n/a)`, include it before Template C as an optional copy/paste command. It must be read-only and the expected output tail must contain `Gate:` + `Recommendation:`; otherwise fall back to Template C prompt only.
+5. **Fill from profile**: substitute every `{{profile.*}}` placeholder below with the real value from `./.claude/fidelity-profile.md`. Fill `<page-name>` / `<route>` from the user.
+6. **Output**: put the filled prompt or reviewer command + prompt in a single fenced code block, verbatim, nothing extra around it.
 
 > The prompt already tells the executor to pull the source, run the page with `{{profile.verify.runtime_tool}}`, do Loop Engineering, and run the gate. Do not add steps.
 
@@ -103,6 +104,7 @@ Submit: run the review gate (fidelity-review / {{profile.gate.reviewer_host}}), 
 ## Template C — REVIEW a built page (emit a reviewer prompt for another host)
 
 > Use when the page is already built (by you or another executor) and a **different** host should run the gate. The reviewer is **read-only**: it audits the diff + the executor's evidence and emits the verdict — it does NOT edit code or run the page. Fill `<page-name>` / `<route>` / `<spec-section>` and the diff locator, then output the block verbatim.
+> If `profile.gate.reviewer_cmd` is configured, print it before the prompt as an optional read-only convenience. If the command is unavailable or the output misses `Gate:` / `Recommendation:`, discard that output and use the prompt manually.
 
 ```
 Task: act as the READ-ONLY Reviewer (the fidelity gate) for the "<page-name>" page (route: <route>), reproduced 1:1 against the oa-mockup. You did NOT write this code — do not edit it, do not run the page. Audit only, then emit a PASS/FAIL gate.
