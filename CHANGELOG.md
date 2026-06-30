@@ -5,6 +5,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); the
 
 ## [Unreleased]
 
+### Changed
+- `react-tailwind-radix-vite` example — second Tailwind Zone-4 sharp edge in Project notes: the `border` utility is 1px and `border-transparent` is still a 1px border (not `border:none`), so a shared base class with per-variant border *color* silently adds ~2px box-model drift where the mockup is `border:none`. Surfaced by the **cross-model** dogfood (a Codex reviewer caught it as a `[P1]` the single-model pass had rated PASS).
+
 ## [0.3.0] — 2026-06-29
 
 ### Added
