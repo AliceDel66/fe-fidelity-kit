@@ -214,6 +214,8 @@ The executor's evidence isn't loose screenshots — it follows a naming contract
 
 > **A reviewer PASS never means "the page renders right."** Runtime layout/overflow/console/box-model are the executor's job and a *precondition* of PASS — see [Caveats](#caveats-that-cap-the-gate) for the single-model, measurement-incapable, and state-undrivable degradations.
 
+> **Proven on a real run, not just claimed.** In a dogfood, a single-model two-pass rated a reproduced landing page `Gate: PASS` — its own box-model evidence read 18/18. Handed the *same* reviewer contract, a different vendor's model (Codex) returned `Gate: FAIL`: a shared button component gave every variant a 1px border where the mockup was `border:none` — a ~2px box-model drift, invisible because the border was transparent. The blind spot lived in the executor's *own* evidence (it never measured the button border), so the same model's second pass inherited it; a different model, reading the code fresh, caught it as a `[P1]`. After the fix, the same cross-model reviewer returned `Gate: PASS`. That is non-overlapping blind spots, on a real defect.
+
 ---
 
 ## The five disaster zones

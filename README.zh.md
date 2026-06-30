@@ -214,6 +214,8 @@ executor 的证据不是零散截图 —— 它遵循一套命名契约（`<rout
 
 > **reviewer 给 PASS 从不等于「页面渲染正确」。** 运行时的 layout/overflow/console/box-model 是 executor 的职责，且是 PASS 的*前提* —— 关于 single-model / 无法测量 / 无法驱动状态等降级，见[设上限的情况](#会给-gate-设上限的情况)。
 
+> **是实测，不是口号。** 一次 dogfood 里，单模型 two-pass 给复刻好的落地页判了 `Gate: PASS` —— 它自己的 box-model 证据是 18/18。把*同一份* reviewer 契约交给另一个厂商的模型（Codex），却判了 `Gate: FAIL`：一个共享按钮组件给每个变体都加了 1px 边，而 mockup 是 `border:none` —— 约 2px 的 box-model 漂移，因边框透明而肉眼不可见。盲点就在 executor *自己*的证据里（它从没量过按钮边），所以同模型的第二遍继承了它；换个模型从代码读起，把它抓成了 `[P1]`。修复后，同一个跨模型 reviewer 判了 `Gate: PASS`。这就是「盲点不重叠」—— 发生在一个真实缺陷上。
+
 ---
 
 ## 五个灾难区
